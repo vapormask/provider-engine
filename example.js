@@ -3,7 +3,7 @@ const ZeroClientProvider = require('./zero.js')
 
 // create engine
 var engine = ZeroClientProvider({
-  rpcUrl: 'https://testrpc.metamask.io/',
+  rpcUrl: 'https://testrpc-vapormask.vapory.org/',
 })
 
 // log new blocks

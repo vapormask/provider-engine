@@ -6,7 +6,7 @@
 const inherits = require('util').inherits
 const Subprovider = require('./subprovider.js')
 const extend = require('xtend')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 
 module.exports = SanitizerSubprovider
 
@@ -40,7 +40,7 @@ var permitted = [
 function cloneTxParams(txParams){
   var sanitized  =  permitted.reduce(function(copy, permitted) {
     if (permitted in txParams) {
-      copy[permitted] = ethUtil.addHexPrefix(txParams[permitted])
+      copy[permitted] = vapUtil.addHexPrefix(txParams[permitted])
     }
     return copy
   }, {})

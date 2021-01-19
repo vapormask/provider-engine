@@ -47,7 +47,7 @@ function ZeroClientProvider(opts){
 
   // data source
   var rpcSubprovider = new RpcSubprovider({
-    rpcUrl: opts.rpcUrl || 'https://testrpc.metamask.io/',
+    rpcUrl: opts.rpcUrl || 'https://testrpc-vapormask.vapory.org/',
   })
   engine.addProvider(rpcSubprovider)
 

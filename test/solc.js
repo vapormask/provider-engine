@@ -23,7 +23,7 @@ test('solc test', function(t){
   var contractSource = 'pragma solidity ^0.4.2; contract test { function multiply(uint a) returns(uint d) {   return a * 7;   } }'
 
   engine.start()
-  engine.sendAsync(createPayload({ method: 'eth_compileSolidity', params: [ contractSource ] }), function(err, response){
+  engine.sendAsync(createPayload({ method: 'vap_compileSolidity', params: [ contractSource ] }), function(err, response){
     t.ifError(err, 'did not error')
     t.ok(response, 'has response')
 
@@ -32,11 +32,11 @@ test('solc test', function(t){
     t.equal(response.result.info.compilerVersion, solc.version())
     t.ok(response.result.info.abiDefinition, 'has abiDefinition')
 
-    t.equal(providerA.getWitnessed('eth_compileSolidity').length, 1, 'providerA did see "eth_compileSolidity"')
-    t.equal(providerA.getHandled('eth_compileSolidity').length, 1, 'providerA did handle "eth_compileSolidity"')
+    t.equal(providerA.getWitnessed('vap_compileSolidity').length, 1, 'providerA did see "vap_compileSolidity"')
+    t.equal(providerA.getHandled('vap_compileSolidity').length, 1, 'providerA did handle "vap_compileSolidity"')
 
-    t.equal(providerB.getWitnessed('eth_compileSolidity').length, 0, 'providerB did NOT see "eth_compileSolidity"')
-    t.equal(providerB.getHandled('eth_compileSolidity').length, 0, 'providerB did NOT handle "eth_compileSolidity"')
+    t.equal(providerB.getWitnessed('vap_compileSolidity').length, 0, 'providerB did NOT see "vap_compileSolidity"')
+    t.equal(providerB.getHandled('vap_compileSolidity').length, 0, 'providerB did NOT handle "vap_compileSolidity"')
 
     engine.stop()
     t.end()

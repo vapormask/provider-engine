@@ -1,5 +1,5 @@
 /*
- * Uses ethereumjs-tx to sign a transaction.
+ * Uses vaporyjs-tx to sign a transaction.
  *
  * The two callbacks a user needs to implement are:
  * - getAccounts() -- array of addresses supported
@@ -10,17 +10,17 @@
 
 const inherits = require('util').inherits
 const HookedWalletProvider = require('./hooked-wallet.js')
-const EthTx = require('ethereumjs-tx')
-const ethUtil = require('ethereumjs-util')
+const VapTx = require('vaporyjs-tx')
+const vapUtil = require('vaporyjs-util')
 
-module.exports = HookedWalletEthTxSubprovider
+module.exports = HookedWalletVapTxSubprovider
 
-inherits(HookedWalletEthTxSubprovider, HookedWalletProvider)
+inherits(HookedWalletVapTxSubprovider, HookedWalletProvider)
 
-function HookedWalletEthTxSubprovider(opts) {
+function HookedWalletVapTxSubprovider(opts) {
   const self = this
   
-  HookedWalletEthTxSubprovider.super_.call(self, opts)
+  HookedWalletVapTxSubprovider.super_.call(self, opts)
 
   self.signTransaction = function(txData, cb) {
     // defaults
@@ -30,7 +30,7 @@ function HookedWalletEthTxSubprovider(opts) {
     opts.getPrivateKey(txData.from, function(err, privateKey) {
       if (err) return cb(err)
 
-      var tx = new EthTx(txData)
+      var tx = new VapTx(txData)
       tx.sign(privateKey)
       cb(null, '0x' + tx.serialize().toString('hex'))
     })
@@ -39,9 +39,9 @@ function HookedWalletEthTxSubprovider(opts) {
   self.signMessage = function(msgParams, cb) {
     opts.getPrivateKey(msgParams.from, function(err, privateKey) {
       if (err) return cb(err)
-      var msgHash = ethUtil.sha3(msgParams.data)
-      var sig = ethUtil.ecsign(msgHash, privateKey)
-      var serialized = ethUtil.bufferToHex(concatSig(sig.v, sig.r, sig.s))
+      var msgHash = vapUtil.sha3(msgParams.data)
+      var sig = vapUtil.ecsign(msgHash, privateKey)
+      var serialized = vapUtil.bufferToHex(concatSig(sig.v, sig.r, sig.s))
       cb(null, serialized)
     })
   }
@@ -49,11 +49,11 @@ function HookedWalletEthTxSubprovider(opts) {
 }
 
 function concatSig(v, r, s) {
-  r = ethUtil.fromSigned(r)
-  s = ethUtil.fromSigned(s)
-  v = ethUtil.bufferToInt(v)
-  r = ethUtil.toUnsigned(r).toString('hex')
-  s = ethUtil.toUnsigned(s).toString('hex')
-  v = ethUtil.stripHexPrefix(ethUtil.intToHex(v))
-  return ethUtil.addHexPrefix(r.concat(s, v).toString("hex"))
+  r = vapUtil.fromSigned(r)
+  s = vapUtil.fromSigned(s)
+  v = vapUtil.bufferToInt(v)
+  r = vapUtil.toUnsigned(r).toString('hex')
+  s = vapUtil.toUnsigned(s).toString('hex')
+  v = vapUtil.stripHexPrefix(vapUtil.intToHex(v))
+  return vapUtil.addHexPrefix(r.concat(s, v).toString("hex"))
 }

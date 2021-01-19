@@ -3,7 +3,7 @@ const inherits = require('util').inherits
 const Stoplight = require('./util/stoplight.js')
 const cacheUtils = require('./util/rpc-cache-utils.js')
 const createPayload = require('./util/create-payload.js')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const async = require('async')
 
 module.exports = Web3ProviderEngine
@@ -189,7 +189,7 @@ Web3ProviderEngine.prototype._fetchBlock = function(number, cb){
 
   // skip: cache, readiness, block number rewrite
   self._handleAsync(createPayload({
-    method: 'eth_getBlockByNumber',
+    method: 'vap_getBlockByNumber',
     params: [number, false],
   }), function(err, resultObj){
     if (err) return cb(err)
@@ -199,23 +199,23 @@ Web3ProviderEngine.prototype._fetchBlock = function(number, cb){
 
     // json -> buffers
     var block = {
-      number:           ethUtil.toBuffer(data.number),
-      hash:             ethUtil.toBuffer(data.hash),
-      parentHash:       ethUtil.toBuffer(data.parentHash),
-      nonce:            ethUtil.toBuffer(data.nonce),
-      sha3Uncles:       ethUtil.toBuffer(data.sha3Uncles),
-      logsBloom:        ethUtil.toBuffer(data.logsBloom),
-      transactionsRoot: ethUtil.toBuffer(data.transactionsRoot),
-      stateRoot:        ethUtil.toBuffer(data.stateRoot),
-      receiptRoot:      ethUtil.toBuffer(data.receiptRoot),
-      miner:            ethUtil.toBuffer(data.miner),
-      difficulty:       ethUtil.toBuffer(data.difficulty),
-      totalDifficulty:  ethUtil.toBuffer(data.totalDifficulty),
-      size:             ethUtil.toBuffer(data.size),
-      extraData:        ethUtil.toBuffer(data.extraData),
-      gasLimit:         ethUtil.toBuffer(data.gasLimit),
-      gasUsed:          ethUtil.toBuffer(data.gasUsed),
-      timestamp:        ethUtil.toBuffer(data.timestamp),
+      number:           vapUtil.toBuffer(data.number),
+      hash:             vapUtil.toBuffer(data.hash),
+      parentHash:       vapUtil.toBuffer(data.parentHash),
+      nonce:            vapUtil.toBuffer(data.nonce),
+      sha3Uncles:       vapUtil.toBuffer(data.sha3Uncles),
+      logsBloom:        vapUtil.toBuffer(data.logsBloom),
+      transactionsRoot: vapUtil.toBuffer(data.transactionsRoot),
+      stateRoot:        vapUtil.toBuffer(data.stateRoot),
+      receiptRoot:      vapUtil.toBuffer(data.receiptRoot),
+      miner:            vapUtil.toBuffer(data.miner),
+      difficulty:       vapUtil.toBuffer(data.difficulty),
+      totalDifficulty:  vapUtil.toBuffer(data.totalDifficulty),
+      size:             vapUtil.toBuffer(data.size),
+      extraData:        vapUtil.toBuffer(data.extraData),
+      gasLimit:         vapUtil.toBuffer(data.gasLimit),
+      gasUsed:          vapUtil.toBuffer(data.gasUsed),
+      timestamp:        vapUtil.toBuffer(data.timestamp),
       transactions:     data.transactions,
     }
 
@@ -226,8 +226,8 @@ Web3ProviderEngine.prototype._fetchBlock = function(number, cb){
 Web3ProviderEngine.prototype._inspectResponseForNewBlock = function(payload, resultObj, cb) {
 
   // these methods return responses with a block reference
-  if (payload.method != 'eth_getTransactionByHash'
-   && payload.method != 'eth_getTransactionReceipt') {
+  if (payload.method != 'vap_getTransactionByHash'
+   && payload.method != 'vap_getTransactionReceipt') {
     return cb(null, resultObj)
   }
 
@@ -235,7 +235,7 @@ Web3ProviderEngine.prototype._inspectResponseForNewBlock = function(payload, res
     return cb(null, resultObj)
   }
 
-  var blockNumber = ethUtil.toBuffer(resultObj.result.blockNumber)
+  var blockNumber = vapUtil.toBuffer(resultObj.result.blockNumber)
 
   // If we found a new block number on the result,
   // fetch the block details before returning the original response.

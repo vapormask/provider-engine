@@ -1,3 +1,3 @@
-require('./etherscan')
+require('./vaporscan')
 require('./ipc');
 require('./sanitizer');

@@ -4,14 +4,14 @@ module.exports = estimateGas
 
 /*
 
-This is a work around for https://github.com/ethereum/go-ethereum/issues/2577
+This is a work around for https://github.com/vaporyco/go-vapory/issues/2577
 
 */
 
 
 function estimateGas(provider, txParams, cb) {
   provider.sendAsync(createPayload({
-    method: 'eth_estimateGas',
+    method: 'vap_estimateGas',
     params: [txParams]
   }), function(err, res){
     if (err) {

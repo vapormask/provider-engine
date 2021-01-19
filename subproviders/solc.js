@@ -16,11 +16,11 @@ function SolcSubprovider(opts) {
 
 SolcSubprovider.prototype.handleRequest = function(payload, next, end) {
   switch (payload.method) {
-    case 'eth_getCompilers':
+    case 'vap_getCompilers':
       cb(null, [ "solidity" ])
       break
 
-    case 'eth_compileSolidity':
+    case 'vap_compileSolidity':
       this._compileSolidity(payload, end)
       break;
 
@@ -29,7 +29,7 @@ SolcSubprovider.prototype.handleRequest = function(payload, next, end) {
   }
 }
 
-// Conforms to https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_compilesolidity
+// Conforms to https://github.com/vaporyco/wiki/wiki/JSON-RPC#vap_compilesolidity
 SolcSubprovider.prototype._compileSolidity = function(payload, end) {
   // optimised
   var output = this.solc.compile(payload.params[0], 1)

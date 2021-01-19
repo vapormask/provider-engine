@@ -1,5 +1,5 @@
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const clone = require('clone')
 const cacheUtils = require('../util/rpc-cache-utils.js')
 const Stoplight = require('../util/stoplight.js')
@@ -16,7 +16,7 @@ function BlockCacheProvider(opts) {
   self._ready = new Stoplight()
   self.strategies = {
     perma: new ConditionalPermaCacheStrategy({
-      eth_getTransactionByHash: function(result) {
+      vap_getTransactionByHash: function(result) {
         return Boolean(result && result.blockHash)
       },
     }),
@@ -50,7 +50,7 @@ BlockCacheProvider.prototype.handleRequest = function(payload, next, end){
   }
 
   // Ignore block polling requests.
-  if (payload.method === 'eth_getBlockByNumber' && payload.params[0] === 'latest') {
+  if (payload.method === 'vap_getBlockByNumber' && payload.params[0] === 'latest') {
     // console.log('CACHE SKIP - Ignore block polling requests.')
     return next()
   }
@@ -237,9 +237,9 @@ BlockCacheStrategy.prototype.canCache = function(payload) {
 // naively removes older block caches
 BlockCacheStrategy.prototype.cacheRollOff = function(currentBlock){
   const self = this
-  var currentNumber = ethUtil.bufferToInt(currentBlock.number)
+  var currentNumber = vapUtil.bufferToInt(currentBlock.number)
   if (currentNumber > 0) {
-    var previousHex = ethUtil.intToHex(currentNumber-1)
+    var previousHex = vapUtil.intToHex(currentNumber-1)
     delete self.cache[previousHex]
   }
 }
@@ -248,7 +248,7 @@ BlockCacheStrategy.prototype.cacheRollOff = function(currentBlock){
 // util
 
 function bufferToHex(buffer){
-  return ethUtil.addHexPrefix(buffer.toString('hex'))
+  return vapUtil.addHexPrefix(buffer.toString('hex'))
 }
 
 function compareHex(hexA, hexB){

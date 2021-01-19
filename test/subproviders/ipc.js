@@ -1,9 +1,9 @@
-const sha3 = require('ethereumjs-util').sha3;
+const sha3 = require('vaporyjs-util').sha3;
 const test = require('tape')
 const ProviderEngine = require('../../index.js')
 const createPayload = require('../../util/create-payload.js')
 const IpcSubprovider = require('../../subproviders/ipc')
-const socketPath = process.argv[2]; // e.g. '/root/.ethereum/geth.ipc'
+const socketPath = process.argv[2]; // e.g. '/root/.vapory/gvap.ipc'
 
 test('ipc personal_listAccounts', function(t) {
   t.plan(3)

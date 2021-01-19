@@ -1,12 +1,12 @@
 const inherits = require('util').inherits
 const extend = require('xtend')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const FixtureProvider = require('../../subproviders/fixture.js')
 
 module.exports = TestBlockProvider
 
 //
-// handles only `eth_getBlockByNumber` requests
+// handles only `vap_getBlockByNumber` requests
 // returns a dummy block
 //
 
@@ -16,10 +16,10 @@ function TestBlockProvider(methods){
   self._currentBlock = createBlock()
   self._pendingTxs = []
   FixtureProvider.call(self, {
-    eth_getBlockByNumber: function(payload, next, end){
+    vap_getBlockByNumber: function(payload, next, end){
       end(null, self._currentBlock)
     },
-    eth_getLogs: function(payload, next, end){
+    vap_getLogs: function(payload, next, end){
       end(null, self._currentBlock.transactions)
     },
   })
@@ -87,9 +87,9 @@ function createBlock(blockParams, prevBlock, txs) {
 }
 
 function incrementHex(hexString){
-  return ethUtil.intToHex(Number(hexString)+1)
+  return vapUtil.intToHex(Number(hexString)+1)
 }
 
 function randomHash(){
-  return ethUtil.intToHex(Math.floor(Math.random()*Number.MAX_SAFE_INTEGER))
+  return vapUtil.intToHex(Math.floor(Math.random()*Number.MAX_SAFE_INTEGER))
 }

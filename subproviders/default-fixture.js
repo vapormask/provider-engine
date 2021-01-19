@@ -11,8 +11,8 @@ function DefaultFixtures() {
   var responses = {
     web3_clientVersion: 'ProviderEngine/v'+version+'/javascript',
     net_listening: true,
-    eth_hashrate: '0x00',
-    eth_mining: false,
+    vap_hashrate: '0x00',
+    vap_mining: false,
   }
   FixtureProvider.call(self, responses)
 }

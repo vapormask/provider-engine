@@ -19,7 +19,7 @@ test('Sanitizer removes unknown keys', function(t) {
     t.equal(payload.params[0].gas, '0x01')
     t.equal(payload.params[0].data, '0x01')
 
-    if (payload.method === 'eth_getBlockByNumber') {
+    if (payload.method === 'vap_getBlockByNumber') {
       return end(null, mockBlock.result)
     }
 
@@ -36,7 +36,7 @@ test('Sanitizer removes unknown keys', function(t) {
   engine.start()
 
   var payload = {
-    method: 'eth_estimateGas',
+    method: 'vap_estimateGas',
     params: [{
       foo: 'bar',
       gas: '0x01',

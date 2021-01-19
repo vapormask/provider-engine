@@ -1,15 +1,15 @@
 const inherits = require('util').inherits
-const Transaction = require('ethereumjs-tx')
-const ethUtil = require('ethereumjs-util')
+const Transaction = require('vaporyjs-tx')
+const vapUtil = require('vaporyjs-util')
 const Subprovider = require('./subprovider.js')
 const blockTagForPayload = require('../util/rpc-cache-utils').blockTagForPayload
 
 module.exports = NonceTrackerSubprovider
 
 // handles the following RPC methods:
-//   eth_getTransactionCount (pending only)
+//   vap_getTransactionCount (pending only)
 // observes the following RPC methods:
-//   eth_sendRawTransaction
+//   vap_sendRawTransaction
 
 
 inherits(NonceTrackerSubprovider, Subprovider)
@@ -25,7 +25,7 @@ NonceTrackerSubprovider.prototype.handleRequest = function(payload, next, end){
 
   switch(payload.method) {
 
-    case 'eth_getTransactionCount':
+    case 'vap_getTransactionCount':
       var blockTag = blockTagForPayload(payload)
       var address = payload.params[0]
       var cachedResult = self.nonceCache[address]
@@ -49,20 +49,20 @@ NonceTrackerSubprovider.prototype.handleRequest = function(payload, next, end){
       }
       return
 
-    case 'eth_sendRawTransaction':
+    case 'vap_sendRawTransaction':
       // allow the request to continue normally
       next(function(err, result, cb){
         // only update local nonce if tx was submitted correctly
         if (err) return cb()
         // parse raw tx
         var rawTx = payload.params[0]
-        var stripped = ethUtil.stripHexPrefix(rawTx)
-        var rawData = new Buffer(ethUtil.stripHexPrefix(rawTx), 'hex')
-        var tx = new Transaction(new Buffer(ethUtil.stripHexPrefix(rawTx), 'hex'))
+        var stripped = vapUtil.stripHexPrefix(rawTx)
+        var rawData = new Buffer(vapUtil.stripHexPrefix(rawTx), 'hex')
+        var tx = new Transaction(new Buffer(vapUtil.stripHexPrefix(rawTx), 'hex'))
         // extract address
         var address = '0x'+tx.getSenderAddress().toString('hex')
         // extract nonce and increment
-        var nonce = ethUtil.bufferToInt(tx.nonce)
+        var nonce = vapUtil.bufferToInt(tx.nonce)
         nonce++
         // hexify and normalize
         var hexNonce = nonce.toString(16)

@@ -1,20 +1,20 @@
 const async = require('async')
 const inherits = require('util').inherits
 const Stoplight = require('../util/stoplight.js')
-const VM = require('ethereumjs-vm')
-const Block = require('ethereumjs-block')
-const Account = require('ethereumjs-account')
-const FakeTransaction = require('ethereumjs-tx/fake.js')
+const VM = require('vaporyjs-vm')
+const Block = require('vaporyjs-block')
+const Account = require('vaporyjs-account')
+const FakeTransaction = require('vaporyjs-tx/fake.js')
 const FakeMerklePatriciaTree = require('fake-merkle-patricia-tree')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const createPayload = require('../util/create-payload.js')
 const Subprovider = require('./subprovider.js')
 
 module.exports = VmSubprovider
 
 // handles the following RPC methods:
-//   eth_call
-//   eth_estimateGas
+//   vap_call
+//   vap_estimateGas
 
 
 inherits(VmSubprovider, Subprovider)
@@ -22,7 +22,7 @@ inherits(VmSubprovider, Subprovider)
 function VmSubprovider(opts){
   const self = this
   self.opts = opts || {};
-  self.methods = ['eth_call', 'eth_estimateGas']
+  self.methods = ['vap_call', 'vap_estimateGas']
   // set initialization blocker
   self._ready = new Stoplight()
 }
@@ -50,23 +50,23 @@ VmSubprovider.prototype.handleRequest = function(payload, next, end) {
 
     switch (payload.method) {
 
-      case 'eth_call':
+      case 'vap_call':
         var result = '0x'
         if (!results.error && results.vm.return) {
           // console.log(results.vm.return.toString('hex'))
-          result = ethUtil.addHexPrefix(results.vm.return.toString('hex'))
+          result = vapUtil.addHexPrefix(results.vm.return.toString('hex'))
         }
         return end(null, result)
 
-      case 'eth_estimateGas':
-        // since eth_estimateGas is just eth_call with
+      case 'vap_estimateGas':
+        // since vap_estimateGas is just vap_call with
         // a different part of the results,
-        // I considered transforming request to eth_call
+        // I considered transforming request to vap_call
         // to reduce the cache area, but we'd need to store
         // the full vm result somewhere, instead of just
         // the return value. so instead we just run it again.
 
-        var result = ethUtil.addHexPrefix(results.gasUsed.toString('hex'))
+        var result = vapUtil.addHexPrefix(results.gasUsed.toString('hex'))
         return end(null, result)
 
     }
@@ -78,7 +78,7 @@ VmSubprovider.prototype.runVm = function(payload, cb){
 
   var blockData = self.currentBlock
   var block = blockFromBlockData(blockData)
-  var blockNumber = ethUtil.addHexPrefix(blockData.number.toString('hex'))
+  var blockNumber = vapUtil.addHexPrefix(blockData.number.toString('hex'))
 
   // create vm with state lookup intercepted
   var vm = self.vm = new VM(null, null, {
@@ -101,13 +101,13 @@ VmSubprovider.prototype.runVm = function(payload, cb){
   // console.log('params:', payload.params)
 
   var tx = new FakeTransaction({
-    to: txParams.to ? ethUtil.addHexPrefix(txParams.to) : undefined,
-    from: txParams.from ? ethUtil.addHexPrefix(txParams.from) : undefined,
-    value: txParams.value ? ethUtil.addHexPrefix(txParams.value) : undefined,
-    data: txParams.data ? ethUtil.addHexPrefix(txParams.data) : undefined,
-    gasLimit: txParams.gas ? ethUtil.addHexPrefix(txParams.gas) : block.header.gasLimit,
-    gasPrice: txParams.gasPrice ? ethUtil.addHexPrefix(txParams.gasPrice) : undefined,
-    nonce: txParams.nonce ? ethUtil.addHexPrefix(txParams.nonce) : undefined,
+    to: txParams.to ? vapUtil.addHexPrefix(txParams.to) : undefined,
+    from: txParams.from ? vapUtil.addHexPrefix(txParams.from) : undefined,
+    value: txParams.value ? vapUtil.addHexPrefix(txParams.value) : undefined,
+    data: txParams.data ? vapUtil.addHexPrefix(txParams.data) : undefined,
+    gasLimit: txParams.gas ? vapUtil.addHexPrefix(txParams.gas) : block.header.gasLimit,
+    gasPrice: txParams.gasPrice ? vapUtil.addHexPrefix(txParams.gasPrice) : undefined,
+    nonce: txParams.nonce ? vapUtil.addHexPrefix(txParams.nonce) : undefined,
   })
 
   vm.runTx({
@@ -131,7 +131,7 @@ VmSubprovider.prototype.runVm = function(payload, cb){
 
 VmSubprovider.prototype._createAccountStorageTrie = function(blockNumber, address, cb){
   const self = this
-  var addressHex = ethUtil.addHexPrefix(address.toString('hex'))
+  var addressHex = vapUtil.addHexPrefix(address.toString('hex'))
   var storageTrie = new FallbackStorageTrie({
     fetchStorage: fetchStorage,
   })
@@ -144,7 +144,7 @@ VmSubprovider.prototype._createAccountStorageTrie = function(blockNumber, addres
 
 VmSubprovider.prototype._fetchAccount = function(blockNumber, address, cb){
   const self = this
-  var addressHex = ethUtil.addHexPrefix(address.toString('hex'))
+  var addressHex = vapUtil.addHexPrefix(address.toString('hex'))
   async.parallel({
     nonce: self._fetchAccountNonce.bind(self, addressHex, blockNumber),
     balance: self._fetchAccountBalance.bind(self, addressHex, blockNumber),
@@ -154,7 +154,7 @@ VmSubprovider.prototype._fetchAccount = function(blockNumber, address, cb){
     results._exists = results.nonce !== '0x0' || results.balance != '0x0' || results._code != '0x'
     // console.log('fetch account results:', results)
     var account = new Account(results)
-    // needs to be anything but the default (ethUtil.SHA3_NULL)
+    // needs to be anything but the default (vapUtil.SHA3_NULL)
     account.codeHash = new Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
     cb(null, account)
   })
@@ -163,7 +163,7 @@ VmSubprovider.prototype._fetchAccount = function(blockNumber, address, cb){
 
 VmSubprovider.prototype._fetchAccountStorage = function(address, key, blockNumber, cb){
   const self = this
-  self.emitPayload({ method: 'eth_getStorageAt', params: [address, key, blockNumber] }, function(err, results){
+  self.emitPayload({ method: 'vap_getStorageAt', params: [address, key, blockNumber] }, function(err, results){
     if (err) return cb(err)
     if (results.error) return cb(results.error.message)
 
@@ -173,7 +173,7 @@ VmSubprovider.prototype._fetchAccountStorage = function(address, key, blockNumbe
 
 VmSubprovider.prototype._fetchAccountBalance = function(address, blockNumber, cb){
   const self = this
-  self.emitPayload({ method: 'eth_getBalance', params: [address, blockNumber] }, function(err, results){
+  self.emitPayload({ method: 'vap_getBalance', params: [address, blockNumber] }, function(err, results){
     if (err) return cb(err)
     if (results.error) return cb(results.error.message)
     cb(null, results.result)
@@ -182,7 +182,7 @@ VmSubprovider.prototype._fetchAccountBalance = function(address, blockNumber, cb
 
 VmSubprovider.prototype._fetchAccountNonce = function(address, blockNumber, cb){
   const self = this
-  self.emitPayload({ method: 'eth_getTransactionCount', params: [address, blockNumber] }, function(err, results){
+  self.emitPayload({ method: 'vap_getTransactionCount', params: [address, blockNumber] }, function(err, results){
     if (err) return cb(err)
     if (results.error) return cb(results.error.message);
     cb(null, results.result)
@@ -191,7 +191,7 @@ VmSubprovider.prototype._fetchAccountNonce = function(address, blockNumber, cb){
 
 VmSubprovider.prototype._fetchAccountCode = function(address, blockNumber, cb){
   const self = this
-  self.emitPayload({ method: 'eth_getCode', params: [address, blockNumber] }, function(err, results){
+  self.emitPayload({ method: 'vap_getCode', params: [address, blockNumber] }, function(err, results){
     if (err) return cb(err)
     if (results.error) return cb(results.error.message);
     cb(null, results.result)
@@ -226,9 +226,9 @@ FallbackStorageTrie.prototype.get = function(key, cb){
     var keyHex = key.toString('hex')
     self._fetchStorage(keyHex, function(err, rawValue){
       if (err) return cb(err)
-      var value = ethUtil.toBuffer(rawValue)
-      value = ethUtil.unpad(value)
-      var encodedValue = ethUtil.rlp.encode(value)
+      var value = vapUtil.toBuffer(rawValue)
+      value = vapUtil.unpad(value)
+      var encodedValue = vapUtil.rlp.encode(value)
       cb(null, encodedValue)
     })
   })
@@ -260,7 +260,7 @@ FallbackAsyncStore.prototype.get = function(address, cb){
     self.fetch(addressHex, function(err, value){
       // console.log('FallbackAsyncStore - fetch return', arguments)
       if (err) return cb(err)
-      value = ethUtil.toBuffer(value);
+      value = vapUtil.toBuffer(value);
       self.cache[addressHex] = value
       cb(null, value)
     })
@@ -289,7 +289,7 @@ function isNormalVmError(message){
 
 function blockFromBlockData(blockData){
   var block = new Block()
-  // block.header.hash = ethUtil.addHexPrefix(blockData.hash.toString('hex'))
+  // block.header.hash = vapUtil.addHexPrefix(blockData.hash.toString('hex'))
 
   block.header.parentHash = blockData.parentHash
   block.header.uncleHash = blockData.sha3Uncles

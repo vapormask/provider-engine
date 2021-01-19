@@ -1,5 +1,5 @@
 /*
- * Emulate 'eth_accounts' / 'eth_sendTransaction' using 'eth_sendRawTransaction'
+ * Emulate 'vap_accounts' / 'vap_sendTransaction' using 'vap_sendRawTransaction'
  *
  * The two callbacks a user needs to implement are:
  * - getAccounts() -- array of addresses supported
@@ -16,10 +16,10 @@ const estimateGas = require('../util/estimate-gas.js')
 module.exports = HookedWalletSubprovider
 
 // handles the following RPC methods:
-//   eth_coinbase
-//   eth_accounts
-//   eth_sendTransaction
-//   eth_sign
+//   vap_coinbase
+//   vap_accounts
+//   vap_sendTransaction
+//   vap_sign
 
 
 inherits(HookedWalletSubprovider, Subprovider)
@@ -44,7 +44,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
 
   switch(payload.method) {
 
-    case 'eth_coinbase':
+    case 'vap_coinbase':
       self.getAccounts(function(err, accounts){
         if (err) return end(err)
         var result = accounts[0] || null
@@ -52,14 +52,14 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       })
       return
 
-    case 'eth_accounts':
+    case 'vap_accounts':
       self.getAccounts(function(err, accounts){
         if (err) return end(err)
         end(null, accounts)
       })
       return
 
-    case 'eth_sendTransaction':
+    case 'vap_sendTransaction':
       var txParams = payload.params[0]
       async.waterfall([
         self.validateTransaction.bind(self, txParams),
@@ -69,7 +69,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       ], end)
       return
 
-    case 'eth_sign':
+    case 'vap_sign':
       var address = payload.params[0]
       var message = payload.params[1]
       // non-standard "extraParams" to be appended to our "msgParams" obj
@@ -120,7 +120,7 @@ HookedWalletSubprovider.prototype.finalizeAndSubmitTx = function(txParams, cb) {
 HookedWalletSubprovider.prototype.submitTx = function(rawTx, cb) {
   const self = this
   self.emitPayload({
-    method: 'eth_sendRawTransaction',
+    method: 'vap_sendRawTransaction',
     params: [rawTx],
   }, function(err, result){
     if (err) return cb(err)
@@ -169,12 +169,12 @@ HookedWalletSubprovider.prototype.fillInTxExtras = function(txParams, cb){
 
   if (txParams.gasPrice === undefined) {
     // console.log("need to get gasprice")
-    reqs.gasPrice = self.emitPayload.bind(self, { method: 'eth_gasPrice', params: [] })
+    reqs.gasPrice = self.emitPayload.bind(self, { method: 'vap_gasPrice', params: [] })
   }
 
   if (txParams.nonce === undefined) {
     // console.log("need to get nonce")
-    reqs.nonce = self.emitPayload.bind(self, { method: 'eth_getTransactionCount', params: [address, 'pending'] })
+    reqs.nonce = self.emitPayload.bind(self, { method: 'vap_getTransactionCount', params: [address, 'pending'] })
   }
 
   if (txParams.gas === undefined) {
