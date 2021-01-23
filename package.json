@@ -1,8 +1,9 @@
 {
-  "name": "web3-provider-engine",
+  "name": "@vapormask/web3-provider-engine",
+  "namespace": "vapormask",
   "version": "14.1.0",
   "description": "",
-  "repository": "https://github.com/MetaMask/provider-engine",
+  "repository": "https://github.com/VaporMask/provider-engine",
   "main": "index.js",
   "scripts": {
     "test": "node test/index.js",
