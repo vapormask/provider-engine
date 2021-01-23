@@ -10,26 +10,26 @@ function WhitelistProvider(methods){
 
   if (this.methods == null) {
     this.methods = [
-      'eth_gasPrice',
-      'eth_blockNumber',
-      'eth_getBalance',
-      'eth_getBlockByHash',
-      'eth_getBlockByNumber',
-      'eth_getBlockTransactionCountByHash',
-      'eth_getBlockTransactionCountByNumber',
-      'eth_getCode',
-      'eth_getStorageAt',
-      'eth_getTransactionByBlockHashAndIndex',
-      'eth_getTransactionByBlockNumberAndIndex',
-      'eth_getTransactionByHash',
-      'eth_getTransactionCount',
-      'eth_getTransactionReceipt',
-      'eth_getUncleByBlockHashAndIndex',
-      'eth_getUncleByBlockNumberAndIndex',
-      'eth_getUncleCountByBlockHash',
-      'eth_getUncleCountByBlockNumber',
-      'eth_sendRawTransaction',
-      'eth_getLogs'
+      'vap_gasPrice',
+      'vap_blockNumber',
+      'vap_getBalance',
+      'vap_getBlockByHash',
+      'vap_getBlockByNumber',
+      'vap_getBlockTransactionCountByHash',
+      'vap_getBlockTransactionCountByNumber',
+      'vap_getCode',
+      'vap_getStorageAt',
+      'vap_getTransactionByBlockHashAndIndex',
+      'vap_getTransactionByBlockNumberAndIndex',
+      'vap_getTransactionByHash',
+      'vap_getTransactionCount',
+      'vap_getTransactionReceipt',
+      'vap_getUncleByBlockHashAndIndex',
+      'vap_getUncleByBlockNumberAndIndex',
+      'vap_getUncleCountByBlockHash',
+      'vap_getUncleCountByBlockNumber',
+      'vap_sendRawTransaction',
+      'vap_getLogs'
     ];
   }
 }

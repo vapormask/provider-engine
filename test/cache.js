@@ -9,140 +9,140 @@ const injectMetrics = require('./util/inject-metrics')
 // skip cache
 
 cacheTest('skipCache - true', {
-  method: 'eth_getBalance',
+  method: 'vap_getBalance',
   skipCache: true,
 }, false)
 
 cacheTest('skipCache - false', {
-  method: 'eth_getBalance',
+  method: 'vap_getBalance',
   skipCache: false,
 }, true)
 
 // block tags
 
 cacheTest('getBalance + undefined blockTag', {
-  method: 'eth_getBalance',
+  method: 'vap_getBalance',
   params: ['0x1234'],
 }, true)
 
 cacheTest('getBalance + latest blockTag', {
-  method: 'eth_getBalance',
+  method: 'vap_getBalance',
   params: ['0x1234', 'latest'],
 }, true)
 
 cacheTest('getBalance + pending blockTag', {
-  method: 'eth_getBalance',
+  method: 'vap_getBalance',
   params: ['0x1234', 'pending'],
 }, false)
 
 // tx by hash
 
 cacheTest('getTransactionByHash for transaction that doesn\'t exist', {
-  method: 'eth_getTransactionByHash',
+  method: 'vap_getTransactionByHash',
   params: ['0x00000000000000000000000000000000000000000000000000deadbeefcafe00'],
 }, false)
 
 cacheTest('getTransactionByHash for transaction that\'s pending', {
-  method: 'eth_getTransactionByHash',
+  method: 'vap_getTransactionByHash',
   params: ['0x00000000000000000000000000000000000000000000000000deadbeefcafe01'],
 }, false)
 
 cacheTest('getTransactionByHash for mined transaction', {
-  method: 'eth_getTransactionByHash',
+  method: 'vap_getTransactionByHash',
   params: ['0x00000000000000000000000000000000000000000000000000deadbeefcafe02'],
 }, true)
 
 // code
 
 cacheTest('getCode for latest block, then for earliest block, should not return cached response on second request', [{
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', 'latest'],
 }, {
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', 'earliest'],
 }], false)
 
 cacheTest('getCode for a specific block, then for the one before it, should not return cached response on second request', [{
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', '0x3'],
 }, {
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', '0x2'],
 }], false)
 
 cacheTest('getCode for a specific block, then the one after it, should return cached response on second request', [{
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', '0x2'],
 }, {
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', '0x3'],
 }], true)
 
 cacheTest('getCode for an unspecified block, then for the latest, should return cached response on second request', [{
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234'],
 }, {
-  method: 'eth_getCode',
+  method: 'vap_getCode',
   params: ['0x1234', 'latest'],
 }], true)
 
 // blocks
 
 cacheTest('getBlockForNumber for latest then block 0', [{
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['latest'],
 }, {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x0'],
 }], false)
 
 cacheTest('getBlockForNumber for latest then block 1', [{
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['latest'],
 }, {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x1'],
 }], false)
 
 cacheTest('getBlockForNumber for 0 then block 1', [{
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x0'],
 }, {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x1'],
 }], false)
 
 cacheTest('getBlockForNumber for block 0', [{
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x0'],
 }, {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x0'],
 }], true)
 
 cacheTest('getBlockForNumber for block 1', [{
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x1'],
 }, {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x1'],
 }], true)
 
 // storage
 
 cacheTest('getStorageAt for same block should cache', [{
-  method: 'eth_getStorageAt',
+  method: 'vap_getStorageAt',
   params: ['0x295a70b2de5e3953354a6a8344e616ed314d7251', '0x0', '0x1234'],
 }, {
-  method: 'eth_getStorageAt',
+  method: 'vap_getStorageAt',
   params: ['0x295a70b2de5e3953354a6a8344e616ed314d7251', '0x0', '0x1234'],
 }], true)
 
 cacheTest('getStorageAt for different block should not cache', [{
-  method: 'eth_getStorageAt',
+  method: 'vap_getStorageAt',
   params: ['0x295a70b2de5e3953354a6a8344e616ed314d7251', '0x0', '0x1234'],
 }, {
-  method: 'eth_getStorageAt',
+  method: 'vap_getStorageAt',
   params: ['0x295a70b2de5e3953354a6a8344e616ed314d7251', '0x0', '0x4321'],
 }], false)
 
@@ -165,9 +165,9 @@ function cacheTest(label, payloads, shouldHitCacheOnSecondRequest){
     var cacheProvider = injectMetrics(new CacheProvider())
     // handle balance
     var dataProvider = injectMetrics(new FixtureProvider({
-      eth_getBalance: '0xdeadbeef',
-      eth_getCode: '6060604052600560005560408060156000396000f3606060405260e060020a60003504633fa4f245811460245780635524107714602c575b005b603660005481565b6004356000556022565b6060908152602090f3',
-      eth_getTransactionByHash: function(payload, next, end) {
+      vap_getBalance: '0xdeadbeef',
+      vap_getCode: '6060604052600560005560408060156000396000f3606060405260e060020a60003504633fa4f245811460245780635524107714602c575b005b603660005481565b6004356000556022565b6060908152602090f3',
+      vap_getTransactionByHash: function(payload, next, end) {
         // represents a pending tx
         if (payload.params[0] === '0x00000000000000000000000000000000000000000000000000deadbeefcafe00') {
           end(null, null)
@@ -201,7 +201,7 @@ function cacheTest(label, payloads, shouldHitCacheOnSecondRequest){
           })
         }
       },
-      eth_getStorageAt: '0x00000000000000000000000000000000000000000000000000000000deadbeef',
+      vap_getStorageAt: '0x00000000000000000000000000000000000000000000000000000000deadbeef',
     }))
     // handle dummy block
     var blockProvider = injectMetrics(new TestBlockProvider())
@@ -222,7 +222,7 @@ function cacheTest(label, payloads, shouldHitCacheOnSecondRequest){
       blockProvider.clearMetrics()
 
       // determine which provider will handle the request
-      const isBlockTest = (payloads[0].method === 'eth_getBlockByNumber')
+      const isBlockTest = (payloads[0].method === 'vap_getBlockByNumber')
       const handlingProvider = isBlockTest ? blockProvider : dataProvider
 
       // begin cache test

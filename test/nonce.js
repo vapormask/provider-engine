@@ -1,6 +1,6 @@
 const test = require('tape')
-const Transaction = require('ethereumjs-tx')
-const ethUtil = require('ethereumjs-util')
+const Transaction = require('vaporyjs-tx')
+const vapUtil = require('vaporyjs-util')
 const ProviderEngine = require('../index.js')
 const FixtureProvider = require('../subproviders/fixture.js')
 const NonceTracker = require('../subproviders/nonce-tracker.js')
@@ -31,10 +31,10 @@ test('basic nonce tracking', function(t){
   var providerB = injectMetrics(new NonceTracker())
   // handle all bottom requests
   var providerC = injectMetrics(new FixtureProvider({
-    eth_gasPrice: '0x1234',
-    eth_getTransactionCount: '0x00',
-    eth_sendRawTransaction: function(payload, next, done){
-      var rawTx = ethUtil.toBuffer(payload.params[0])
+    vap_gasPrice: '0x1234',
+    vap_getTransactionCount: '0x00',
+    vap_sendRawTransaction: function(payload, next, done){
+      var rawTx = vapUtil.toBuffer(payload.params[0])
       var tx = new Transaction(rawTx)
       var hash = '0x'+tx.hash().toString('hex')
       done(null, hash)
@@ -50,7 +50,7 @@ test('basic nonce tracking', function(t){
   engine.addProvider(providerD)
 
   var txPayload = {
-    method: 'eth_sendTransaction',
+    method: 'vap_sendTransaction',
     params: [{
       from: addressHex,
       to: addressHex,
@@ -65,16 +65,16 @@ test('basic nonce tracking', function(t){
     t.ok(response, 'has response')
 
     // tx nonce
-    t.equal(providerB.getWitnessed('eth_getTransactionCount').length, 1, 'providerB did see "eth_getTransactionCount"')
-    t.equal(providerB.getHandled('eth_getTransactionCount').length, 0, 'providerB did NOT handle "eth_getTransactionCount"')
-    t.equal(providerC.getWitnessed('eth_getTransactionCount').length, 1, 'providerC did see "eth_getTransactionCount"')
-    t.equal(providerC.getHandled('eth_getTransactionCount').length, 1, 'providerC did handle "eth_getTransactionCount"')
+    t.equal(providerB.getWitnessed('vap_getTransactionCount').length, 1, 'providerB did see "vap_getTransactionCount"')
+    t.equal(providerB.getHandled('vap_getTransactionCount').length, 0, 'providerB did NOT handle "vap_getTransactionCount"')
+    t.equal(providerC.getWitnessed('vap_getTransactionCount').length, 1, 'providerC did see "vap_getTransactionCount"')
+    t.equal(providerC.getHandled('vap_getTransactionCount').length, 1, 'providerC did handle "vap_getTransactionCount"')
     // send raw tx
-    t.equal(providerC.getWitnessed('eth_sendRawTransaction').length, 1, 'providerC did see "eth_sendRawTransaction"')
-    t.equal(providerC.getHandled('eth_sendRawTransaction').length, 1, 'providerC did handle "eth_sendRawTransaction"')
+    t.equal(providerC.getWitnessed('vap_sendRawTransaction').length, 1, 'providerC did see "vap_sendRawTransaction"')
+    t.equal(providerC.getHandled('vap_sendRawTransaction').length, 1, 'providerC did handle "vap_sendRawTransaction"')
 
     engine.sendAsync(createPayload({
-      method: 'eth_getTransactionCount',
+      method: 'vap_getTransactionCount',
       params: [addressHex, 'pending'],
     }), function(err, response){
       t.ifError(err, 'did not error')
@@ -114,9 +114,9 @@ test('nonce tracking - on error', function(t){
   var providerB = injectMetrics(new NonceTracker())
   // handle all bottom requests
   var providerC = injectMetrics(new FixtureProvider({
-    eth_gasPrice: '0x1234',
-    eth_getTransactionCount: '0x00',
-    eth_sendRawTransaction: function(payload, next, done){
+    vap_gasPrice: '0x1234',
+    vap_getTransactionCount: '0x00',
+    vap_sendRawTransaction: function(payload, next, done){
       done(new Error('Always fail.'))
     },
   }))
@@ -130,7 +130,7 @@ test('nonce tracking - on error', function(t){
   engine.addProvider(providerD)
 
   var txPayload = {
-    method: 'eth_sendTransaction',
+    method: 'vap_sendTransaction',
     params: [{
       from: addressHex,
       to: addressHex,
@@ -145,17 +145,17 @@ test('nonce tracking - on error', function(t){
     t.ok(response.error, 'has response')
 
     // tx nonce
-    t.equal(providerB.getWitnessed('eth_getTransactionCount').length, 1, 'providerB did see "eth_getTransactionCount"')
-    t.equal(providerB.getHandled('eth_getTransactionCount').length, 0, 'providerB did NOT handle "eth_getTransactionCount"')
-    t.equal(providerC.getWitnessed('eth_getTransactionCount').length, 1, 'providerC did see "eth_getTransactionCount"')
-    t.equal(providerC.getHandled('eth_getTransactionCount').length, 1, 'providerC did handle "eth_getTransactionCount"')
+    t.equal(providerB.getWitnessed('vap_getTransactionCount').length, 1, 'providerB did see "vap_getTransactionCount"')
+    t.equal(providerB.getHandled('vap_getTransactionCount').length, 0, 'providerB did NOT handle "vap_getTransactionCount"')
+    t.equal(providerC.getWitnessed('vap_getTransactionCount').length, 1, 'providerC did see "vap_getTransactionCount"')
+    t.equal(providerC.getHandled('vap_getTransactionCount').length, 1, 'providerC did handle "vap_getTransactionCount"')
 
     // send raw tx
-    t.equal(providerC.getWitnessed('eth_sendRawTransaction').length, 1, 'providerC did see "eth_sendRawTransaction"')
-    t.equal(providerC.getHandled('eth_sendRawTransaction').length, 1, 'providerC did handle "eth_sendRawTransaction"')
+    t.equal(providerC.getWitnessed('vap_sendRawTransaction').length, 1, 'providerC did see "vap_sendRawTransaction"')
+    t.equal(providerC.getHandled('vap_sendRawTransaction').length, 1, 'providerC did handle "vap_sendRawTransaction"')
 
     engine.sendAsync(createPayload({
-      method: 'eth_getTransactionCount',
+      method: 'vap_getTransactionCount',
       params: [addressHex, 'pending'],
     }), function(err, response){
       t.ifError(err, 'did not error')

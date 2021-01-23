@@ -2,7 +2,7 @@ const EventEmitter = require('events').EventEmitter
 const FilterSubprovider = require('./filters.js')
 const from = require('../util/rpc-hex-encoding.js')
 const inherits = require('util').inherits
-const utils = require('ethereumjs-util')
+const utils = require('vaporyjs-util')
 
 function SubscriptionSubprovider(opts) {
   const self = this
@@ -24,7 +24,7 @@ Object.assign(SubscriptionSubprovider.prototype, EventEmitter.prototype)
 // preserve our constructor, though
 SubscriptionSubprovider.prototype.constructor = SubscriptionSubprovider
 
-SubscriptionSubprovider.prototype.eth_subscribe = function(payload, cb) {
+SubscriptionSubprovider.prototype.vap_subscribe = function(payload, cb) {
   const self = this
   let createSubscriptionFilter = () => {}
   let subscriptionType = payload.params[0]
@@ -77,7 +77,7 @@ SubscriptionSubprovider.prototype._notificationHandler = function (id, subscript
   // so we must emit null along with the result object
   self.emit('data', null, {
     jsonrpc: "2.0",
-    method: "eth_subscription",
+    method: "vap_subscription",
     params: {
       subscription: id,
       result: result,
@@ -105,7 +105,7 @@ SubscriptionSubprovider.prototype._notificationResultFromBlock = function(block)
   }
 }
 
-SubscriptionSubprovider.prototype.eth_unsubscribe = function(payload, cb) {
+SubscriptionSubprovider.prototype.vap_unsubscribe = function(payload, cb) {
   const self = this
   let subscriptionId = payload.params[0]
   if (!self.subscriptions[subscriptionId]) {
@@ -121,11 +121,11 @@ SubscriptionSubprovider.prototype.eth_unsubscribe = function(payload, cb) {
 
 SubscriptionSubprovider.prototype.handleRequest = function(payload, next, end) {
   switch(payload.method){
-    case 'eth_subscribe':
-      this.eth_subscribe(payload, end)
+    case 'vap_subscribe':
+      this.vap_subscribe(payload, end)
       break
-    case 'eth_unsubscribe':
-      this.eth_unsubscribe(payload, end)
+    case 'vap_unsubscribe':
+      this.vap_unsubscribe(payload, end)
       break
     default:
       FilterSubprovider.prototype.handleRequest.apply(this, Array.prototype.slice.call(arguments))

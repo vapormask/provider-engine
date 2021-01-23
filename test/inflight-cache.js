@@ -8,20 +8,20 @@ const createPayload = require('../util/create-payload.js')
 const injectMetrics = require('./util/inject-metrics')
 
 inflightTest('getBalance for latest', {
-  method: 'eth_getBalance',
+  method: 'vap_getBalance',
   params: ['0xabcd', 'latest'],
 }, true)
 
 inflightTest('getBlock for latest', {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['latest', false],
 }, true)
 
 inflightTest('getBlock for latest then 0', [{
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['latest', false],
 }, {
-  method: 'eth_getBlockByNumber',
+  method: 'vap_getBlockByNumber',
   params: ['0x0', false],
 }], false)
 
@@ -37,7 +37,7 @@ function inflightTest(label, payloads, shouldHitCacheOnSecondRequest){
     var cacheProvider = injectMetrics(new InflightCacheProvider())
     // handle balance
     var dataProvider = injectMetrics(new FixtureProvider({
-      eth_getBalance: '0xdeadbeef',
+      vap_getBalance: '0xdeadbeef',
     }))
     // handle dummy block
     var blockProvider = injectMetrics(new TestBlockProvider())
@@ -58,7 +58,7 @@ function inflightTest(label, payloads, shouldHitCacheOnSecondRequest){
       blockProvider.clearMetrics()
 
       // determine which provider will handle the request
-      const isBlockTest = (payloads[0].method === 'eth_getBlockByNumber')
+      const isBlockTest = (payloads[0].method === 'vap_getBlockByNumber')
       const handlingProvider = isBlockTest ? blockProvider : dataProvider
 
       // begin cache test

@@ -51,7 +51,7 @@ function ZeroClientProvider(opts){
     signTransaction: opts.signTransaction,
     publishTransaction: opts.publishTransaction,
     // messages
-    // old eth_sign
+    // old vap_sign
     processMessage: opts.processMessage,
     approveMessage: opts.approveMessage,
     signMessage: opts.signMessage,

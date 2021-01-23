@@ -1,8 +1,8 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ZeroClientProvider = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 const EventEmitter = require('events').EventEmitter
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
-const EthBlockTracker = require('eth-block-tracker')
+const vapUtil = require('vaporyjs-util')
+const VapBlockTracker = require('vap-block-tracker')
 const map = require('async/map')
 const eachSeries = require('async/eachSeries')
 const Stoplight = require('./util/stoplight.js')
@@ -22,7 +22,7 @@ function Web3ProviderEngine(opts) {
   opts = opts || {}
   // block polling
   const skipInitBlockProvider = { sendAsync: self._handleAsync.bind(self) }
-  self._blockTracker = new EthBlockTracker({
+  self._blockTracker = new VapBlockTracker({
     provider: skipInitBlockProvider,
     pollingInterval: opts.pollingInterval || 4000,
   })
@@ -160,8 +160,8 @@ Web3ProviderEngine.prototype._inspectResponseForNewBlock = function(payload, res
   const self = this
 
   // these methods return responses with a block reference
-  if (payload.method !== 'eth_getTransactionByHash'
-   && payload.method !== 'eth_getTransactionReceipt') {
+  if (payload.method !== 'vap_getTransactionByHash'
+   && payload.method !== 'vap_getTransactionReceipt') {
     return cb(null, resultObj)
   }
 
@@ -170,7 +170,7 @@ Web3ProviderEngine.prototype._inspectResponseForNewBlock = function(payload, res
     return cb(null, resultObj)
   }
 
-  const blockNumber = ethUtil.toBuffer(resultObj.result.blockNumber)
+  const blockNumber = vapUtil.toBuffer(resultObj.result.blockNumber)
 
   // If we found a new block number on the result,
   // and it is higher than our current block,
@@ -200,28 +200,28 @@ function SourceNotFoundError (payload) {
 
 function toBufferBlock (jsonBlock) {
   return {
-    number:           ethUtil.toBuffer(jsonBlock.number),
-    hash:             ethUtil.toBuffer(jsonBlock.hash),
-    parentHash:       ethUtil.toBuffer(jsonBlock.parentHash),
-    nonce:            ethUtil.toBuffer(jsonBlock.nonce),
-    sha3Uncles:       ethUtil.toBuffer(jsonBlock.sha3Uncles),
-    logsBloom:        ethUtil.toBuffer(jsonBlock.logsBloom),
-    transactionsRoot: ethUtil.toBuffer(jsonBlock.transactionsRoot),
-    stateRoot:        ethUtil.toBuffer(jsonBlock.stateRoot),
-    receiptsRoot:     ethUtil.toBuffer(jsonBlock.receiptRoot || jsonBlock.receiptsRoot),
-    miner:            ethUtil.toBuffer(jsonBlock.miner),
-    difficulty:       ethUtil.toBuffer(jsonBlock.difficulty),
-    totalDifficulty:  ethUtil.toBuffer(jsonBlock.totalDifficulty),
-    size:             ethUtil.toBuffer(jsonBlock.size),
-    extraData:        ethUtil.toBuffer(jsonBlock.extraData),
-    gasLimit:         ethUtil.toBuffer(jsonBlock.gasLimit),
-    gasUsed:          ethUtil.toBuffer(jsonBlock.gasUsed),
-    timestamp:        ethUtil.toBuffer(jsonBlock.timestamp),
+    number:           vapUtil.toBuffer(jsonBlock.number),
+    hash:             vapUtil.toBuffer(jsonBlock.hash),
+    parentHash:       vapUtil.toBuffer(jsonBlock.parentHash),
+    nonce:            vapUtil.toBuffer(jsonBlock.nonce),
+    sha3Uncles:       vapUtil.toBuffer(jsonBlock.sha3Uncles),
+    logsBloom:        vapUtil.toBuffer(jsonBlock.logsBloom),
+    transactionsRoot: vapUtil.toBuffer(jsonBlock.transactionsRoot),
+    stateRoot:        vapUtil.toBuffer(jsonBlock.stateRoot),
+    receiptsRoot:     vapUtil.toBuffer(jsonBlock.receiptRoot || jsonBlock.receiptsRoot),
+    miner:            vapUtil.toBuffer(jsonBlock.miner),
+    difficulty:       vapUtil.toBuffer(jsonBlock.difficulty),
+    totalDifficulty:  vapUtil.toBuffer(jsonBlock.totalDifficulty),
+    size:             vapUtil.toBuffer(jsonBlock.size),
+    extraData:        vapUtil.toBuffer(jsonBlock.extraData),
+    gasLimit:         vapUtil.toBuffer(jsonBlock.gasLimit),
+    gasUsed:          vapUtil.toBuffer(jsonBlock.gasUsed),
+    timestamp:        vapUtil.toBuffer(jsonBlock.timestamp),
     transactions:     jsonBlock.transactions,
   }
 }
 
-},{"./util/create-payload.js":294,"./util/rpc-cache-utils.js":297,"./util/stoplight.js":298,"async/eachSeries":10,"async/map":26,"eth-block-tracker":165,"ethereumjs-util":170,"events":172,"util":279}],2:[function(require,module,exports){
+},{"./util/create-payload.js":294,"./util/rpc-cache-utils.js":297,"./util/stoplight.js":298,"async/eachSeries":10,"async/map":26,"vap-block-tracker":165,"vaporyjs-util":170,"events":172,"util":279}],2:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -3388,7 +3388,7 @@ function queue(worker, concurrency, payload) {
 
 /**
  * Creates a `cargo` object with the specified payload. Tasks added to the
- * cargo will be processed altogether (up to the `payload` limit). If the
+ * cargo will be processed altogvaper (up to the `payload` limit). If the
  * `worker` is in progress, the task is queued until it becomes available. Once
  * the `worker` has completed some tasks, each callback of those tasks is
  * called. Check out [these](https://camo.githubusercontent.com/6bbd36f4cf5b35a0f11a96dcd2e97711ffc2fb37/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f313637363837312f36383130382f62626330636662302d356632392d313165322d393734662d3333393763363464633835382e676966) [animations](https://camo.githubusercontent.com/f4810e00e1c5f5f8addbe3e9f49064fd5d102699/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f313637363837312f36383130312f38346339323036362d356632392d313165322d383134662d3964336430323431336266642e676966)
@@ -19857,7 +19857,7 @@ module.exports={
         "spec": ">=6.2.3 <7.0.0",
         "type": "range"
       },
-      "/Users/danfinlay/Documents/Development/ethereum/metamask/node_modules/web3-provider-engine/node_modules/secp256k1"
+      "/Users/danfinlay/Documents/Development/vapory/vapormask/node_modules/web3-provider-engine/node_modules/secp256k1"
     ]
   ],
   "_from": "elliptic@>=6.2.3 <7.0.0",
@@ -19893,7 +19893,7 @@ module.exports={
   "_shasum": "cac9af8762c85836187003c8dfe193e5e2eae5df",
   "_shrinkwrap": null,
   "_spec": "elliptic@^6.2.3",
-  "_where": "/Users/danfinlay/Documents/Development/ethereum/metamask/node_modules/web3-provider-engine/node_modules/secp256k1",
+  "_where": "/Users/danfinlay/Documents/Development/vapory/vapormask/node_modules/web3-provider-engine/node_modules/secp256k1",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -19972,7 +19972,7 @@ module.exports={
 },{}],164:[function(require,module,exports){
 'use strict';
 
-var ethjsUtil = require('ethjs-util');
+var vapjsUtil = require('vapjs-util');
 
 module.exports = {
   incrementHexNumber: incrementHexNumber,
@@ -19980,17 +19980,17 @@ module.exports = {
 };
 
 function incrementHexNumber(hexNum) {
-  return formatHex(ethjsUtil.intToHex(parseInt(hexNum, 16) + 1));
+  return formatHex(vapjsUtil.intToHex(parseInt(hexNum, 16) + 1));
 }
 
 function formatHex(hexNum) {
-  var stripped = ethjsUtil.stripHexPrefix(hexNum);
+  var stripped = vapjsUtil.stripHexPrefix(hexNum);
   while (stripped[0] === '0') {
     stripped = stripped.substr(1);
   }
   return '0x' + stripped;
 }
-},{"ethjs-util":171}],165:[function(require,module,exports){
+},{"vapjs-util":171}],165:[function(require,module,exports){
 'use strict';
 
 var _regenerator = require('babel-runtime/regenerator');
@@ -20023,8 +20023,8 @@ var _inherits3 = _interopRequireDefault(_inherits2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// const EthQuery = require('ethjs-query')
-var EthQuery = require('eth-query');
+// const VapQuery = require('vapjs-query')
+var VapQuery = require('vap-query');
 var AsyncEventEmitter = require('async-eventemitter');
 var pify = require('pify');
 var hexUtils = require('./hexUtils');
@@ -20040,7 +20040,7 @@ var RpcBlockTracker = function (_AsyncEventEmitter) {
     var _this = (0, _possibleConstructorReturn3.default)(this, (RpcBlockTracker.__proto__ || (0, _getPrototypeOf2.default)(RpcBlockTracker)).call(this));
 
     if (!opts.provider) throw new Error('RpcBlockTracker - no provider specified.');
-    _this._query = new EthQuery(opts.provider);
+    _this._query = new VapQuery(opts.provider);
     // config
     _this._pollingInterval = opts.pollingInterval || 800;
     // state
@@ -20385,14 +20385,14 @@ module.exports = RpcBlockTracker;
 // │     └─ s: 0x1610cdac2782c91065fd43584cd8974f7f3b4e6d46a2aafe7b101788285bf3f2
 // ├─ transactionsRoot: 0xb090c32d840dec1e9752719f21bbae4a73e58333aecb89bc3b8ed559fb2712a3
 // └─ uncles
-},{"./hexUtils":164,"async-eventemitter":3,"babel-runtime/core-js/object/get-prototype-of":31,"babel-runtime/helpers/asyncToGenerator":36,"babel-runtime/helpers/classCallCheck":37,"babel-runtime/helpers/createClass":38,"babel-runtime/helpers/inherits":39,"babel-runtime/helpers/possibleConstructorReturn":40,"babel-runtime/regenerator":42,"eth-query":166,"pify":236}],166:[function(require,module,exports){
+},{"./hexUtils":164,"async-eventemitter":3,"babel-runtime/core-js/object/get-prototype-of":31,"babel-runtime/helpers/asyncToGenerator":36,"babel-runtime/helpers/classCallCheck":37,"babel-runtime/helpers/createClass":38,"babel-runtime/helpers/inherits":39,"babel-runtime/helpers/possibleConstructorReturn":40,"babel-runtime/regenerator":42,"vap-query":166,"pify":236}],166:[function(require,module,exports){
 const extend = require('xtend')
 const createRandomId = require('json-rpc-random-id')()
 
-module.exports = EthQuery
+module.exports = VapQuery
 
 
-function EthQuery(provider){
+function VapQuery(provider){
   const self = this
   self.currentProvider = provider
 }
@@ -20402,58 +20402,58 @@ function EthQuery(provider){
 //
 
 // default block 
-EthQuery.prototype.getBalance =                          generateFnWithDefaultBlockFor(2, 'eth_getBalance')
-EthQuery.prototype.getCode =                             generateFnWithDefaultBlockFor(2, 'eth_getCode')
-EthQuery.prototype.getTransactionCount =                 generateFnWithDefaultBlockFor(2, 'eth_getTransactionCount')
-EthQuery.prototype.getStorageAt =                        generateFnWithDefaultBlockFor(3, 'eth_getStorageAt')
-EthQuery.prototype.call =                                generateFnWithDefaultBlockFor(2, 'eth_call')
+VapQuery.prototype.getBalance =                          generateFnWithDefaultBlockFor(2, 'vap_getBalance')
+VapQuery.prototype.getCode =                             generateFnWithDefaultBlockFor(2, 'vap_getCode')
+VapQuery.prototype.getTransactionCount =                 generateFnWithDefaultBlockFor(2, 'vap_getTransactionCount')
+VapQuery.prototype.getStorageAt =                        generateFnWithDefaultBlockFor(3, 'vap_getStorageAt')
+VapQuery.prototype.call =                                generateFnWithDefaultBlockFor(2, 'vap_call')
 // standard
-EthQuery.prototype.protocolVersion =                     generateFnFor('eth_protocolVersion')
-EthQuery.prototype.syncing =                             generateFnFor('eth_syncing')
-EthQuery.prototype.coinbase =                            generateFnFor('eth_coinbase')
-EthQuery.prototype.mining =                              generateFnFor('eth_mining')
-EthQuery.prototype.hashrate =                            generateFnFor('eth_hashrate')
-EthQuery.prototype.gasPrice =                            generateFnFor('eth_gasPrice')
-EthQuery.prototype.accounts =                            generateFnFor('eth_accounts')
-EthQuery.prototype.blockNumber =                         generateFnFor('eth_blockNumber')
-EthQuery.prototype.getBlockTransactionCountByHash =      generateFnFor('eth_getBlockTransactionCountByHash')
-EthQuery.prototype.getBlockTransactionCountByNumber =    generateFnFor('eth_getBlockTransactionCountByNumber')
-EthQuery.prototype.getUncleCountByBlockHash =            generateFnFor('eth_getUncleCountByBlockHash')
-EthQuery.prototype.getUncleCountByBlockNumber =          generateFnFor('eth_getUncleCountByBlockNumber')
-EthQuery.prototype.sign =                                generateFnFor('eth_sign')
-EthQuery.prototype.sendTransaction =                     generateFnFor('eth_sendTransaction')
-EthQuery.prototype.sendRawTransaction =                  generateFnFor('eth_sendRawTransaction')
-EthQuery.prototype.estimateGas =                         generateFnFor('eth_estimateGas')
-EthQuery.prototype.getBlockByHash =                      generateFnFor('eth_getBlockByHash')
-EthQuery.prototype.getBlockByNumber =                    generateFnFor('eth_getBlockByNumber')
-EthQuery.prototype.getTransactionByHash =                generateFnFor('eth_getTransactionByHash')
-EthQuery.prototype.getTransactionByBlockHashAndIndex =   generateFnFor('eth_getTransactionByBlockHashAndIndex')
-EthQuery.prototype.getTransactionByBlockNumberAndIndex = generateFnFor('eth_getTransactionByBlockNumberAndIndex')
-EthQuery.prototype.getTransactionReceipt =               generateFnFor('eth_getTransactionReceipt')
-EthQuery.prototype.getUncleByBlockHashAndIndex =         generateFnFor('eth_getUncleByBlockHashAndIndex')
-EthQuery.prototype.getUncleByBlockNumberAndIndex =       generateFnFor('eth_getUncleByBlockNumberAndIndex')
-EthQuery.prototype.getCompilers =                        generateFnFor('eth_getCompilers')
-EthQuery.prototype.compileLLL =                          generateFnFor('eth_compileLLL')
-EthQuery.prototype.compileSolidity =                     generateFnFor('eth_compileSolidity')
-EthQuery.prototype.compileSerpent =                      generateFnFor('eth_compileSerpent')
-EthQuery.prototype.newFilter =                           generateFnFor('eth_newFilter')
-EthQuery.prototype.newBlockFilter =                      generateFnFor('eth_newBlockFilter')
-EthQuery.prototype.newPendingTransactionFilter =         generateFnFor('eth_newPendingTransactionFilter')
-EthQuery.prototype.uninstallFilter =                     generateFnFor('eth_uninstallFilter')
-EthQuery.prototype.getFilterChanges =                    generateFnFor('eth_getFilterChanges')
-EthQuery.prototype.getFilterLogs =                       generateFnFor('eth_getFilterLogs')
-EthQuery.prototype.getLogs =                             generateFnFor('eth_getLogs')
-EthQuery.prototype.getWork =                             generateFnFor('eth_getWork')
-EthQuery.prototype.submitWork =                          generateFnFor('eth_submitWork')
-EthQuery.prototype.submitHashrate =                      generateFnFor('eth_submitHashrate')
+VapQuery.prototype.protocolVersion =                     generateFnFor('vap_protocolVersion')
+VapQuery.prototype.syncing =                             generateFnFor('vap_syncing')
+VapQuery.prototype.coinbase =                            generateFnFor('vap_coinbase')
+VapQuery.prototype.mining =                              generateFnFor('vap_mining')
+VapQuery.prototype.hashrate =                            generateFnFor('vap_hashrate')
+VapQuery.prototype.gasPrice =                            generateFnFor('vap_gasPrice')
+VapQuery.prototype.accounts =                            generateFnFor('vap_accounts')
+VapQuery.prototype.blockNumber =                         generateFnFor('vap_blockNumber')
+VapQuery.prototype.getBlockTransactionCountByHash =      generateFnFor('vap_getBlockTransactionCountByHash')
+VapQuery.prototype.getBlockTransactionCountByNumber =    generateFnFor('vap_getBlockTransactionCountByNumber')
+VapQuery.prototype.getUncleCountByBlockHash =            generateFnFor('vap_getUncleCountByBlockHash')
+VapQuery.prototype.getUncleCountByBlockNumber =          generateFnFor('vap_getUncleCountByBlockNumber')
+VapQuery.prototype.sign =                                generateFnFor('vap_sign')
+VapQuery.prototype.sendTransaction =                     generateFnFor('vap_sendTransaction')
+VapQuery.prototype.sendRawTransaction =                  generateFnFor('vap_sendRawTransaction')
+VapQuery.prototype.estimateGas =                         generateFnFor('vap_estimateGas')
+VapQuery.prototype.getBlockByHash =                      generateFnFor('vap_getBlockByHash')
+VapQuery.prototype.getBlockByNumber =                    generateFnFor('vap_getBlockByNumber')
+VapQuery.prototype.getTransactionByHash =                generateFnFor('vap_getTransactionByHash')
+VapQuery.prototype.getTransactionByBlockHashAndIndex =   generateFnFor('vap_getTransactionByBlockHashAndIndex')
+VapQuery.prototype.getTransactionByBlockNumberAndIndex = generateFnFor('vap_getTransactionByBlockNumberAndIndex')
+VapQuery.prototype.getTransactionReceipt =               generateFnFor('vap_getTransactionReceipt')
+VapQuery.prototype.getUncleByBlockHashAndIndex =         generateFnFor('vap_getUncleByBlockHashAndIndex')
+VapQuery.prototype.getUncleByBlockNumberAndIndex =       generateFnFor('vap_getUncleByBlockNumberAndIndex')
+VapQuery.prototype.getCompilers =                        generateFnFor('vap_getCompilers')
+VapQuery.prototype.compileLLL =                          generateFnFor('vap_compileLLL')
+VapQuery.prototype.compileSolidity =                     generateFnFor('vap_compileSolidity')
+VapQuery.prototype.compileSerpent =                      generateFnFor('vap_compileSerpent')
+VapQuery.prototype.newFilter =                           generateFnFor('vap_newFilter')
+VapQuery.prototype.newBlockFilter =                      generateFnFor('vap_newBlockFilter')
+VapQuery.prototype.newPendingTransactionFilter =         generateFnFor('vap_newPendingTransactionFilter')
+VapQuery.prototype.uninstallFilter =                     generateFnFor('vap_uninstallFilter')
+VapQuery.prototype.getFilterChanges =                    generateFnFor('vap_getFilterChanges')
+VapQuery.prototype.getFilterLogs =                       generateFnFor('vap_getFilterLogs')
+VapQuery.prototype.getLogs =                             generateFnFor('vap_getLogs')
+VapQuery.prototype.getWork =                             generateFnFor('vap_getWork')
+VapQuery.prototype.submitWork =                          generateFnFor('vap_submitWork')
+VapQuery.prototype.submitHashrate =                      generateFnFor('vap_submitHashrate')
 
 // network level
 
-EthQuery.prototype.sendAsync = function(opts, cb){
+VapQuery.prototype.sendAsync = function(opts, cb){
   const self = this
   self.currentProvider.sendAsync(createPayload(opts), function(err, response){
-    if (err || response.error) console.log('ethquery failure', opts, err || response.error)
-    if (!err && response.error) err = new Error('EthQuery - RPC Error - '+response.error.message)
+    if (err || response.error) console.log('vapquery failure', opts, err || response.error)
+    if (!err && response.error) err = new Error('VapQuery - RPC Error - '+response.error.message)
     if (err) return cb(err)
     cb(null, response.result)
   })
@@ -20498,37 +20498,37 @@ function createPayload(data){
 }
 
 },{"json-rpc-random-id":193,"xtend":281}],167:[function(require,module,exports){
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 
 module.exports = {
 
   concatSig: function (v, r, s) {
-    const rSig = ethUtil.fromSigned(r)
-    const sSig = ethUtil.fromSigned(s)
-    const vSig = ethUtil.bufferToInt(v)
-    const rStr = padWithZeroes(ethUtil.toUnsigned(rSig).toString('hex'), 64)
-    const sStr = padWithZeroes(ethUtil.toUnsigned(sSig).toString('hex'), 64)
-    const vStr = ethUtil.stripHexPrefix(ethUtil.intToHex(vSig))
-    return ethUtil.addHexPrefix(rStr.concat(sStr, vStr)).toString('hex')
+    const rSig = vapUtil.fromSigned(r)
+    const sSig = vapUtil.fromSigned(s)
+    const vSig = vapUtil.bufferToInt(v)
+    const rStr = padWithZeroes(vapUtil.toUnsigned(rSig).toString('hex'), 64)
+    const sStr = padWithZeroes(vapUtil.toUnsigned(sSig).toString('hex'), 64)
+    const vStr = vapUtil.stripHexPrefix(vapUtil.intToHex(vSig))
+    return vapUtil.addHexPrefix(rStr.concat(sStr, vStr)).toString('hex')
   },
 
   normalize: function (address) {
     if (!address) return
-    return ethUtil.addHexPrefix(address.toLowerCase())
+    return vapUtil.addHexPrefix(address.toLowerCase())
   },
 
   personalSign: function (privateKey, msgParams) {
-    var message = ethUtil.toBuffer(msgParams.data)
-    var msgHash = ethUtil.hashPersonalMessage(message)
-    var sig = ethUtil.ecsign(msgHash, privateKey)
-    var serialized = ethUtil.bufferToHex(this.concatSig(sig.v, sig.r, sig.s))
+    var message = vapUtil.toBuffer(msgParams.data)
+    var msgHash = vapUtil.hashPersonalMessage(message)
+    var sig = vapUtil.ecsign(msgHash, privateKey)
+    var serialized = vapUtil.bufferToHex(this.concatSig(sig.v, sig.r, sig.s))
     return serialized
   },
 
   recoverPersonalSignature: function (msgParams) {
     const publicKey = getPublicKeyFor(msgParams)
-    const sender = ethUtil.publicToAddress(publicKey)
-    senderHex = ethUtil.bufferToHex(sender)
+    const sender = vapUtil.publicToAddress(publicKey)
+    senderHex = vapUtil.bufferToHex(sender)
     return senderHex
   },
 
@@ -20541,11 +20541,11 @@ module.exports = {
 
 function getPublicKeyFor (msgParams) {
   let senderHex
-  const message = ethUtil.toBuffer(msgParams.data)
-  const msgHash = ethUtil.hashPersonalMessage(message)
-  const signature = ethUtil.toBuffer(msgParams.sig)
-  const sigParams = ethUtil.fromRpcSig(signature)
-  const publicKey = ethUtil.ecrecover(msgHash, sigParams.v, sigParams.r, sigParams.s)
+  const message = vapUtil.toBuffer(msgParams.data)
+  const msgHash = vapUtil.hashPersonalMessage(message)
+  const signature = vapUtil.toBuffer(msgParams.sig)
+  const sigParams = vapUtil.fromRpcSig(signature)
+  const publicKey = vapUtil.ecrecover(msgHash, sigParams.v, sigParams.r, sigParams.s)
   return publicKey
 }
 
@@ -20558,7 +20558,7 @@ function padWithZeroes (number, length) {
   return myString
 }
 
-},{"ethereumjs-util":170}],168:[function(require,module,exports){
+},{"vaporyjs-util":170}],168:[function(require,module,exports){
 module.exports={
   "genesisGasLimit": {
     "v": 5000,
@@ -20803,9 +20803,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ethUtil = require('ethereumjs-util');
-var fees = require('ethereum-common/params.json');
-var BN = ethUtil.BN;
+var vapUtil = require('vaporyjs-util');
+var fees = require('vapory-common/params.json');
+var BN = vapUtil.BN;
 
 // secp256k1n/2
 var N_DIV_2 = new BN('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0', 16);
@@ -20839,7 +20839,7 @@ var N_DIV_2 = new BN('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f4668
  * @param {Buffer} data.gasLimit transaction gas limit
  * @param {Buffer} data.gasPrice transaction gas price
  * @param {Buffer} data.to to the to address
- * @param {Buffer} data.value the amount of ether sent
+ * @param {Buffer} data.value the amount of vapor sent
  * @param {Buffer} data.data this will contain the data of the message or the init of a contract
  * @param {Buffer} data.v EC signature parameter
  * @param {Buffer} data.r EC signature parameter
@@ -20907,7 +20907,7 @@ var Transaction = function () {
      * @name serialize
      */
     // attached serialize
-    ethUtil.defineProperties(this, fields, data);
+    vapUtil.defineProperties(this, fields, data);
 
     /**
      * @property {Buffer} from (read only) sender address of this transaction, mathematically derived from other parameters.
@@ -20921,7 +20921,7 @@ var Transaction = function () {
     });
 
     // calculate chainId from signature
-    var sigV = ethUtil.bufferToInt(this.v);
+    var sigV = vapUtil.bufferToInt(this.v);
     var chainId = Math.floor((sigV - 35) / 2);
     if (chainId < 0) chainId = 0;
 
@@ -20975,7 +20975,7 @@ var Transaction = function () {
       }
 
       // create hash
-      return ethUtil.rlphash(items);
+      return vapUtil.rlphash(items);
     }
 
     /**
@@ -21001,7 +21001,7 @@ var Transaction = function () {
         return this._from;
       }
       var pubkey = this.getSenderPublicKey();
-      this._from = ethUtil.publicToAddress(pubkey);
+      this._from = vapUtil.publicToAddress(pubkey);
       return this._from;
     }
 
@@ -21034,11 +21034,11 @@ var Transaction = function () {
       }
 
       try {
-        var v = ethUtil.bufferToInt(this.v);
+        var v = vapUtil.bufferToInt(this.v);
         if (this._chainId > 0) {
           v -= this._chainId * 2 + 8;
         }
-        this._senderPubKey = ethUtil.ecrecover(msgHash, v, this.r, this.s);
+        this._senderPubKey = vapUtil.ecrecover(msgHash, v, this.r, this.s);
       } catch (e) {
         return false;
       }
@@ -21055,7 +21055,7 @@ var Transaction = function () {
     key: 'sign',
     value: function sign(privateKey) {
       var msgHash = this.hash(false);
-      var sig = ethUtil.ecsign(msgHash, privateKey);
+      var sig = vapUtil.ecsign(msgHash, privateKey);
       if (this._chainId > 0) {
         sig.v += this._chainId * 2 + 8;
       }
@@ -21136,7 +21136,7 @@ var Transaction = function () {
 module.exports = Transaction;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":51,"ethereum-common/params.json":168,"ethereumjs-util":170}],170:[function(require,module,exports){
+},{"buffer":51,"vapory-common/params.json":168,"vaporyjs-util":170}],170:[function(require,module,exports){
 (function (Buffer){
 const createKeccakHash = require('keccak')
 const secp256k1 = require('secp256k1')
@@ -21144,7 +21144,7 @@ const assert = require('assert')
 const rlp = require('rlp')
 const BN = require('bn.js')
 const createHash = require('create-hash')
-Object.assign(exports, require('ethjs-util'))
+Object.assign(exports, require('vapjs-util'))
 
 /**
  * the max integer that this VM can handle (a ```BN```)
@@ -21201,7 +21201,7 @@ exports.SHA3_RLP = Buffer.from(exports.SHA3_RLP_S, 'hex')
 exports.BN = BN
 
 /**
- * [`rlp`](https://github.com/ethereumjs/rlp)
+ * [`rlp`](https://github.com/vaporyjs/rlp)
  * @var {Function}
  */
 exports.rlp = rlp
@@ -21399,7 +21399,7 @@ exports.isValidPrivate = function (privateKey) {
 
 /**
  * Checks if the public key satisfies the rules of the curve secp256k1
- * and the requirements of Ethereum.
+ * and the requirements of Vapory.
  * @param {Buffer} publicKey The two points of an uncompressed key, unless sanitize is enabled
  * @param {Boolean} [sanitize=false] Accept public keys in other formats
  * @return {Boolean}
@@ -21418,8 +21418,8 @@ exports.isValidPublic = function (publicKey, sanitize) {
 }
 
 /**
- * Returns the ethereum address of a given public key.
- * Accepts "Ethereum public keys" and SEC1 encoded keys.
+ * Returns the vapory address of a given public key.
+ * Accepts "Vapory public keys" and SEC1 encoded keys.
  * @param {Buffer} pubKey The two points of an uncompressed key, unless sanitize is enabled
  * @param {Boolean} [sanitize=false] Accept public keys in other formats
  * @return {Buffer}
@@ -21435,7 +21435,7 @@ exports.pubToAddress = exports.publicToAddress = function (pubKey, sanitize) {
 }
 
 /**
- * Returns the ethereum public key of a given private key
+ * Returns the vapory public key of a given private key
  * @param {Buffer} privateKey A private key must be 256 bits wide
  * @return {Buffer}
  */
@@ -21446,7 +21446,7 @@ var privateToPublic = exports.privateToPublic = function (privateKey) {
 }
 
 /**
- * Converts a public key to the Ethereum format.
+ * Converts a public key to the Vapory format.
  * @param {Buffer} publicKey
  * @return {Buffer}
  */
@@ -21475,15 +21475,15 @@ exports.ecsign = function (msgHash, privateKey) {
 }
 
 /**
- * Returns the keccak-256 hash of `message`, prefixed with the header used by the `eth_sign` RPC call.
- * The output of this function can be fed into `ecsign` to produce the same signature as the `eth_sign`
+ * Returns the keccak-256 hash of `message`, prefixed with the header used by the `vap_sign` RPC call.
+ * The output of this function can be fed into `ecsign` to produce the same signature as the `vap_sign`
  * call for a given `message`, or fed to `ecrecover` along with a signature to recover the public key
  * used to produce the signature.
  * @param message
  * @returns {Buffer} hash
  */
 exports.hashPersonalMessage = function (message) {
-  var prefix = exports.toBuffer('\u0019Ethereum Signed Message:\n' + message.length.toString())
+  var prefix = exports.toBuffer('\u0019Vapory Signed Message:\n' + message.length.toString())
   return exports.sha3(Buffer.concat([prefix, message]))
 }
 
@@ -21506,7 +21506,7 @@ exports.ecrecover = function (msgHash, v, r, s) {
 }
 
 /**
- * Convert signature parameters into the format of `eth_sign` RPC method
+ * Convert signature parameters into the format of `vap_sign` RPC method
  * @param {Number} v
  * @param {Buffer} r
  * @param {Buffer} s
@@ -21518,8 +21518,8 @@ exports.toRpcSig = function (v, r, s) {
     throw new Error('Invalid recovery id')
   }
 
-  // geth (and the RPC eth_sign method) uses the 65 byte format used by Bitcoin
-  // FIXME: this might change in the future - https://github.com/ethereum/go-ethereum/issues/2053
+  // gvap (and the RPC vap_sign method) uses the 65 byte format used by Bitcoin
+  // FIXME: this might change in the future - https://github.com/vapory/go-vapory/issues/2053
   return exports.bufferToHex(Buffer.concat([
     exports.setLengthLeft(r, 32),
     exports.setLengthLeft(s, 32),
@@ -21528,8 +21528,8 @@ exports.toRpcSig = function (v, r, s) {
 }
 
 /**
- * Convert signature format of the `eth_sign` RPC method to signature parameters
- * NOTE: all because of a bug in geth: https://github.com/ethereum/go-ethereum/issues/2053
+ * Convert signature format of the `vap_sign` RPC method to signature parameters
+ * NOTE: all because of a bug in gvap: https://github.com/vapory/go-vapory/issues/2053
  * @param {String} sig
  * @return {Object}
  */
@@ -21542,7 +21542,7 @@ exports.fromRpcSig = function (sig) {
   }
 
   var v = sig[64]
-  // support both versions of `eth_sign` responses
+  // support both versions of `vap_sign` responses
   if (v < 27) {
     v += 27
   }
@@ -21555,7 +21555,7 @@ exports.fromRpcSig = function (sig) {
 }
 
 /**
- * Returns the ethereum address of a given private key
+ * Returns the vapory address of a given private key
  * @param {Buffer} privateKey A private key must be 256 bits wide
  * @return {Buffer}
  */
@@ -21806,7 +21806,7 @@ exports.defineProperties = function (self, fields, data) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"assert":2,"bn.js":45,"buffer":51,"create-hash":145,"ethjs-util":171,"keccak":198,"rlp":254,"secp256k1":256}],171:[function(require,module,exports){
+},{"assert":2,"bn.js":45,"buffer":51,"create-hash":145,"vapjs-util":171,"keccak":198,"rlp":254,"secp256k1":256}],171:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -21822,7 +21822,7 @@ function padToEven(value) {
   var a = value; // eslint-disable-line
 
   if (typeof a !== 'string') {
-    throw new Error('[ethjs-util] while padding to even, value must be string, is currently ' + typeof a + ', while padToEven.');
+    throw new Error('[vapjs-util] while padding to even, value must be string, is currently ' + typeof a + ', while padToEven.');
   }
 
   if (a.length % 2) {
@@ -21861,7 +21861,7 @@ function intToBuffer(i) {
  */
 function getBinarySize(str) {
   if (typeof str !== 'string') {
-    throw new Error('[ethjs-util] while getting binary size, method getBinarySize requires input \'str\' to be type String, got \'' + typeof str + '\'.');
+    throw new Error('[vapjs-util] while getting binary size, method getBinarySize requires input \'str\' to be type String, got \'' + typeof str + '\'.');
   }
 
   return Buffer.byteLength(str, 'utf8');
@@ -21878,10 +21878,10 @@ function getBinarySize(str) {
  */
 function arrayContainsArray(superset, subset, some) {
   if (Array.isArray(superset) !== true) {
-    throw new Error('[ethjs-util] method arrayContainsArray requires input \'superset\' to be an array got type \'' + typeof superset + '\'');
+    throw new Error('[vapjs-util] method arrayContainsArray requires input \'superset\' to be an array got type \'' + typeof superset + '\'');
   }
   if (Array.isArray(subset) !== true) {
-    throw new Error('[ethjs-util] method arrayContainsArray requires input \'subset\' to be an array got type \'' + typeof subset + '\'');
+    throw new Error('[vapjs-util] method arrayContainsArray requires input \'subset\' to be an array got type \'' + typeof subset + '\'');
   }
 
   return subset[Boolean(some) && 'some' || 'every'](function (value) {
@@ -21971,10 +21971,10 @@ function fromAscii(stringValue) {
  */
 function getKeys(params, key, allowEmpty) {
   if (!Array.isArray(params)) {
-    throw new Error('[ethjs-util] method getKeys expecting type Array as \'params\' input, got \'' + typeof params + '\'');
+    throw new Error('[vapjs-util] method getKeys expecting type Array as \'params\' input, got \'' + typeof params + '\'');
   }
   if (typeof key !== 'string') {
-    throw new Error('[ethjs-util] method getKeys expecting type String for input \'key\' got \'' + typeof key + '\'.');
+    throw new Error('[vapjs-util] method getKeys expecting type String for input \'key\' got \'' + typeof key + '\'.');
   }
 
   var result = []; // eslint-disable-line
@@ -24972,7 +24972,7 @@ function str(key, holder) {
                     partial[i] = str(i, value) || 'null';
                 }
                 
-                // Join all of the elements together, separated with commas, and
+                // Join all of the elements togvaper, separated with commas, and
                 // wrap them in brackets.
                 v = partial.length === 0 ? '[]' : gap ?
                     '[\n' + gap + partial.join(',\n' + gap) + '\n' + mind + ']' :
@@ -25007,7 +25007,7 @@ function str(key, holder) {
                 }
             }
             
-        // Join all of the member texts together, separated with commas,
+        // Join all of the member texts togvaper, separated with commas,
         // and wrap them in braces.
 
         v = partial.length === 0 ? '{}' : gap ?
@@ -29497,7 +29497,7 @@ module.exports = RIPEMD160
 (function (Buffer){
 const assert = require('assert')
 /**
- * RLP Encoding based on: https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-RLP
+ * RLP Encoding based on: https://github.com/vapory/wiki/wiki/%5BEnglish%5D-RLP
  * This function takes in a data, convert it to buffer if not, and a length for recursion
  *
  * @param {Buffer,String,Integer,Array} data - will be converted to buffer
@@ -29541,7 +29541,7 @@ function encodeLength (len, offset) {
 }
 
 /**
- * RLP Decoding based on: {@link https://github.com/ethereum/wiki/wiki/%5BEnglish%5D-RLP|RLP}
+ * RLP Decoding based on: {@link https://github.com/vapory/wiki/wiki/%5BEnglish%5D-RLP|RLP}
  * @param {Buffer,String,Integer,Array} data - will be converted to buffer
  * @returns {Array} - returns decode Array of Buffers containg the original message
  **/
@@ -32791,7 +32791,7 @@ module.exports={
   "name": "web3-provider-engine",
   "version": "12.1.0",
   "description": "",
-  "repository": "https://github.com/MetaMask/provider-engine",
+  "repository": "https://github.com/VaporMask/provider-engine",
   "main": "index.js",
   "scripts": {
     "test": "node test/index.js",
@@ -32804,12 +32804,12 @@ module.exports={
   "dependencies": {
     "async": "^2.1.2",
     "clone": "^2.0.0",
-    "eth-block-tracker": "^1.0.15",
-    "eth-sig-util": "^1.2.1",
-    "ethereumjs-block": "^1.2.2",
-    "ethereumjs-tx": "^1.2.0",
-    "ethereumjs-util": "^5.1.1",
-    "ethereumjs-vm": "^2.0.2",
+    "vap-block-tracker": "^1.0.15",
+    "vap-sig-util": "^1.2.1",
+    "vaporyjs-block": "^1.2.2",
+    "vaporyjs-tx": "^1.2.0",
+    "vaporyjs-util": "^5.1.1",
+    "vaporyjs-vm": "^2.0.2",
     "fetch-ponyfill": "^4.0.0",
     "json-rpc-error": "^2.0.0",
     "json-stable-stringify": "^1.0.1",
@@ -32832,8 +32832,8 @@ module.exports={
 
 },{}],283:[function(require,module,exports){
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
-const BN = ethUtil.BN
+const vapUtil = require('vaporyjs-util')
+const BN = vapUtil.BN
 const clone = require('clone')
 const cacheUtils = require('../util/rpc-cache-utils.js')
 const Stoplight = require('../util/stoplight.js')
@@ -32850,8 +32850,8 @@ function BlockCacheProvider(opts) {
   self._ready = new Stoplight()
   self.strategies = {
     perma: new ConditionalPermaCacheStrategy({
-      eth_getTransactionByHash: containsBlockhash,
-      eth_getTransactionReceipt: containsBlockhash,
+      vap_getTransactionByHash: containsBlockhash,
+      vap_getTransactionReceipt: containsBlockhash,
     }),
     block: new BlockCacheStrategy(self),
     fork: new BlockCacheStrategy(self),
@@ -32889,7 +32889,7 @@ BlockCacheProvider.prototype.handleRequest = function(payload, next, end){
   }
 
   // Ignore block polling requests.
-  if (payload.method === 'eth_getBlockByNumber' && payload.params[0] === 'latest') {
+  if (payload.method === 'vap_getBlockByNumber' && payload.params[0] === 'latest') {
     // console.log('CACHE SKIP - Ignore block polling requests.')
     return next()
   }
@@ -32924,7 +32924,7 @@ BlockCacheProvider.prototype._handleRequest = function(payload, next, end){
   if (blockTag === 'earliest') {
     requestedBlockNumber = '0x00'
   } else if (blockTag === 'latest') {
-    requestedBlockNumber = ethUtil.bufferToHex(self.currentBlock.number)
+    requestedBlockNumber = vapUtil.bufferToHex(self.currentBlock.number)
   } else {
     // We have a hex number
     requestedBlockNumber = blockTag
@@ -33083,7 +33083,7 @@ BlockCacheStrategy.prototype.canCache = function(payload) {
 // naively removes older block caches
 BlockCacheStrategy.prototype.cacheRollOff = function(previousBlock){
   const self = this
-  var previousHex = ethUtil.bufferToHex(previousBlock.number)
+  var previousHex = vapUtil.bufferToHex(previousBlock.number)
   delete self.cache[previousHex]
 }
 
@@ -33097,7 +33097,7 @@ function compareHex(hexA, hexB){
 }
 
 function hexToBN(hex){
-  return new BN(ethUtil.toBuffer(hex))
+  return new BN(vapUtil.toBuffer(hex))
 }
 
 function containsBlockhash(result) {
@@ -33106,7 +33106,7 @@ function containsBlockhash(result) {
   const hasNonZeroHash = hexToBN(result.blockHash).gt(new BN(0))
   return hasNonZeroHash
 }
-},{"../util/rpc-cache-utils.js":297,"../util/stoplight.js":298,"./subprovider.js":293,"clone":53,"ethereumjs-util":170,"util":279}],284:[function(require,module,exports){
+},{"../util/rpc-cache-utils.js":297,"../util/stoplight.js":298,"./subprovider.js":293,"clone":53,"vaporyjs-util":170,"util":279}],284:[function(require,module,exports){
 const inherits = require('util').inherits
 const extend = require('xtend')
 const FixtureProvider = require('./fixture.js')
@@ -33122,8 +33122,8 @@ function DefaultFixtures(opts) {
   var responses = extend({
     web3_clientVersion: 'ProviderEngine/v'+version+'/javascript',
     net_listening: true,
-    eth_hashrate: '0x00',
-    eth_mining: false,
+    vap_hashrate: '0x00',
+    vap_mining: false,
   }, opts)
   FixtureProvider.call(self, responses)
 }
@@ -33201,19 +33201,19 @@ RpcSource.prototype.handleRequest = function(payload, next, end){
 },{"../util/create-payload.js":294,"./subprovider.js":293,"fetch-ponyfill":173,"json-rpc-error":191,"promise-to-callback":238,"util":279}],286:[function(require,module,exports){
 const async = require('async')
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const Subprovider = require('./subprovider.js')
 const Stoplight = require('../util/stoplight.js')
 
 module.exports = FilterSubprovider
 
 // handles the following RPC methods:
-//   eth_newBlockFilter
-//   eth_newPendingTransactionFilter
-//   eth_newFilter
-//   eth_getFilterChanges
-//   eth_uninstallFilter
-//   eth_getFilterLogs
+//   vap_newBlockFilter
+//   vap_newPendingTransactionFilter
+//   vap_newFilter
+//   vap_getFilterChanges
+//   vap_uninstallFilter
+//   vap_getFilterLogs
 
 inherits(FilterSubprovider, Subprovider)
 
@@ -33253,32 +33253,32 @@ FilterSubprovider.prototype.handleRequest = function(payload, next, end){
   const self = this
   switch(payload.method){
 
-    case 'eth_newBlockFilter':
+    case 'vap_newBlockFilter':
       self.newBlockFilter(end)
       return
 
-    case 'eth_newPendingTransactionFilter':
+    case 'vap_newPendingTransactionFilter':
       self.newPendingTransactionFilter(end)
       self.checkForPendingBlocks()
       return
 
-    case 'eth_newFilter':
+    case 'vap_newFilter':
       self.newLogFilter(payload.params[0], end)
       return
 
-    case 'eth_getFilterChanges':
+    case 'vap_getFilterChanges':
       self._ready.await(function(){
         self.getFilterChanges(payload.params[0], end)
       })
       return
 
-    case 'eth_getFilterLogs':
+    case 'vap_getFilterLogs':
       self._ready.await(function(){
         self.getFilterLogs(payload.params[0], end)
       })
       return
 
-    case 'eth_uninstallFilter':
+    case 'vap_uninstallFilter':
       self._ready.await(function(){
         self.uninstallFilter(payload.params[0], end)
       })
@@ -33380,7 +33380,7 @@ FilterSubprovider.prototype.getFilterLogs = function(filterId, cb) {
   if (!filter) return cb(null, [])
   if (filter.type === 'log') {
     self.emitPayload({
-      method: 'eth_getLogs',
+      method: 'vap_getLogs',
       params: [{
         fromBlock: filter.fromBlock,
         toBlock: filter.toBlock,
@@ -33426,7 +33426,7 @@ FilterSubprovider.prototype.checkForPendingBlocks = function(){
   if (activePendingTxFilters) {
     self.checkForPendingBlocksActive = true
     self.emitPayload({
-      method: 'eth_getBlockByNumber',
+      method: 'vap_getBlockByNumber',
       params: ['pending', true],
     }, function(err, res){
       if (err) {
@@ -33461,7 +33461,7 @@ FilterSubprovider.prototype._logsForBlock = function(block, cb) {
   const self = this
   var blockNumber = bufferToNumberHex(block.number)
   self.emitPayload({
-    method: 'eth_getLogs',
+    method: 'vap_getLogs',
     params: [{
       fromBlock: blockNumber,
       toBlock: blockNumber,
@@ -33663,7 +33663,7 @@ function normalizeHex(hexString) {
 }
 
 function intToHex(value) {
-  return ethUtil.intToHex(value)
+  return vapUtil.intToHex(value)
 }
 
 function hexToInt(hexString) {
@@ -33679,7 +33679,7 @@ function bufferToNumberHex(buffer) {
 }
 
 function stripLeadingZero(hexNum) {
-  let stripped = ethUtil.stripHexPrefix(hexNum)
+  let stripped = vapUtil.stripHexPrefix(hexNum)
   while (stripped[0] === '0') {
     stripped = stripped.substr(1)
   }
@@ -33694,7 +33694,7 @@ function valuesFor(obj){
   return Object.keys(obj).map(function(key){ return obj[key] })
 }
 
-},{"../util/stoplight.js":298,"./subprovider.js":293,"async":6,"ethereumjs-util":170,"util":279}],287:[function(require,module,exports){
+},{"../util/stoplight.js":298,"./subprovider.js":293,"async":6,"vaporyjs-util":170,"util":279}],287:[function(require,module,exports){
 const inherits = require('util').inherits
 const Subprovider = require('./subprovider.js')
 
@@ -33725,7 +33725,7 @@ FixtureProvider.prototype.handleRequest = function(payload, next, end){
 
 },{"./subprovider.js":293,"util":279}],288:[function(require,module,exports){
 /*
- * Emulate 'eth_accounts' / 'eth_sendTransaction' using 'eth_sendRawTransaction'
+ * Emulate 'vap_accounts' / 'vap_sendTransaction' using 'vap_sendRawTransaction'
  *
  * The two callbacks a user needs to implement are:
  * - getAccounts() -- array of addresses supported
@@ -33735,8 +33735,8 @@ FixtureProvider.prototype.handleRequest = function(payload, next, end){
 const waterfall = require('async/waterfall')
 const parallel = require('async/parallel')
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
-const sigUtil = require('eth-sig-util')
+const vapUtil = require('vaporyjs-util')
+const sigUtil = require('vap-sig-util')
 const extend = require('xtend')
 const Semaphore = require('semaphore')
 const Subprovider = require('./subprovider.js')
@@ -33746,17 +33746,17 @@ const hexRegex = /^[0-9A-Fa-f]+$/g
 module.exports = HookedWalletSubprovider
 
 // handles the following RPC methods:
-//   eth_coinbase
-//   eth_accounts
-//   eth_sendTransaction
-//   eth_sign
+//   vap_coinbase
+//   vap_accounts
+//   vap_sendTransaction
+//   vap_sign
 //   personal_sign
 //   personal_ecRecover
 
 //
 // Tx Signature Flow
 //
-// handleRequest: eth_sendTransaction
+// handleRequest: vap_sendTransaction
 //   validateTransaction (basic validity check)
 //     validateSender (checks that sender is in accounts)
 //   processTransaction (sign tx and submit to network)
@@ -33802,7 +33802,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
 
   switch(payload.method) {
 
-    case 'eth_coinbase':
+    case 'vap_coinbase':
       self.getAccounts(function(err, accounts){
         if (err) return end(err)
         var result = accounts[0] || null
@@ -33810,14 +33810,14 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       })
       return
 
-    case 'eth_accounts':
+    case 'vap_accounts':
       self.getAccounts(function(err, accounts){
         if (err) return end(err)
         end(null, accounts)
       })
       return
 
-    case 'eth_sendTransaction':
+    case 'vap_sendTransaction':
       var txParams = payload.params[0]
       waterfall([
         (cb) => self.validateTransaction(txParams, cb),
@@ -33825,7 +33825,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       ], end)
       return
 
-    case 'eth_signTransaction':
+    case 'vap_signTransaction':
       var txParams = payload.params[0]
       waterfall([
         (cb) => self.validateTransaction(txParams, cb),
@@ -33833,7 +33833,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       ], end)
       return
 
-    case 'eth_sign':
+    case 'vap_sign':
       var address = payload.params[0]
       var message = payload.params[1]
       // non-standard "extraParams" to be appended to our "msgParams" obj
@@ -34050,7 +34050,7 @@ HookedWalletSubprovider.prototype.finalizeTx = function(txParams, cb) {
 HookedWalletSubprovider.prototype.publishTransaction = function(rawTx, cb) {
   const self = this
   self.emitPayload({
-    method: 'eth_sendRawTransaction',
+    method: 'vap_sendRawTransaction',
     params: [rawTx],
   }, function(err, res){
     if (err) return cb(err)
@@ -34067,12 +34067,12 @@ HookedWalletSubprovider.prototype.fillInTxExtras = function(txParams, cb){
 
   if (txParams.gasPrice === undefined) {
     // console.log("need to get gasprice")
-    reqs.gasPrice = self.emitPayload.bind(self, { method: 'eth_gasPrice', params: [] })
+    reqs.gasPrice = self.emitPayload.bind(self, { method: 'vap_gasPrice', params: [] })
   }
 
   if (txParams.nonce === undefined) {
     // console.log("need to get nonce")
-    reqs.nonce = self.emitPayload.bind(self, { method: 'eth_getTransactionCount', params: [address, 'pending'] })
+    reqs.nonce = self.emitPayload.bind(self, { method: 'vap_getTransactionCount', params: [address, 'pending'] })
   }
 
   if (txParams.gas === undefined) {
@@ -34122,7 +34122,7 @@ function isValidHex(data) {
   return isValid
 }
 
-},{"../util/estimate-gas.js":295,"./subprovider.js":293,"async/parallel":27,"async/waterfall":28,"eth-sig-util":167,"ethereumjs-util":170,"semaphore":262,"util":279,"xtend":281}],289:[function(require,module,exports){
+},{"../util/estimate-gas.js":295,"./subprovider.js":293,"async/parallel":27,"async/waterfall":28,"vap-sig-util":167,"vaporyjs-util":170,"semaphore":262,"util":279,"xtend":281}],289:[function(require,module,exports){
 const cacheIdentifierForPayload = require('../util/rpc-cache-utils.js').cacheIdentifierForPayload
 const Subprovider = require('./subprovider.js')
 
@@ -34171,17 +34171,17 @@ module.exports = InflightCacheSubprovider
 },{"../util/rpc-cache-utils.js":297,"./subprovider.js":293}],290:[function(require,module,exports){
 (function (Buffer){
 const inherits = require('util').inherits
-const Transaction = require('ethereumjs-tx')
-const ethUtil = require('ethereumjs-util')
+const Transaction = require('vaporyjs-tx')
+const vapUtil = require('vaporyjs-util')
 const Subprovider = require('./subprovider.js')
 const blockTagForPayload = require('../util/rpc-cache-utils').blockTagForPayload
 
 module.exports = NonceTrackerSubprovider
 
 // handles the following RPC methods:
-//   eth_getTransactionCount (pending only)
+//   vap_getTransactionCount (pending only)
 // observes the following RPC methods:
-//   eth_sendRawTransaction
+//   vap_sendRawTransaction
 
 
 inherits(NonceTrackerSubprovider, Subprovider)
@@ -34197,7 +34197,7 @@ NonceTrackerSubprovider.prototype.handleRequest = function(payload, next, end){
 
   switch(payload.method) {
 
-    case 'eth_getTransactionCount':
+    case 'vap_getTransactionCount':
       var blockTag = blockTagForPayload(payload)
       var address = payload.params[0].toLowerCase()
       var cachedResult = self.nonceCache[address]
@@ -34221,20 +34221,20 @@ NonceTrackerSubprovider.prototype.handleRequest = function(payload, next, end){
       }
       return
 
-    case 'eth_sendRawTransaction':
+    case 'vap_sendRawTransaction':
       // allow the request to continue normally
       next(function(err, result, cb){
         // only update local nonce if tx was submitted correctly
         if (err) return cb()
         // parse raw tx
         var rawTx = payload.params[0]
-        var stripped = ethUtil.stripHexPrefix(rawTx)
-        var rawData = new Buffer(ethUtil.stripHexPrefix(rawTx), 'hex')
-        var tx = new Transaction(new Buffer(ethUtil.stripHexPrefix(rawTx), 'hex'))
+        var stripped = vapUtil.stripHexPrefix(rawTx)
+        var rawData = new Buffer(vapUtil.stripHexPrefix(rawTx), 'hex')
+        var tx = new Transaction(new Buffer(vapUtil.stripHexPrefix(rawTx), 'hex'))
         // extract address
         var address = '0x'+tx.getSenderAddress().toString('hex').toLowerCase()
         // extract nonce and increment
-        var nonce = ethUtil.bufferToInt(tx.nonce)
+        var nonce = vapUtil.bufferToInt(tx.nonce)
         nonce++
         // hexify and normalize
         var hexNonce = nonce.toString(16)
@@ -34254,7 +34254,7 @@ NonceTrackerSubprovider.prototype.handleRequest = function(payload, next, end){
   }
 }
 }).call(this,require("buffer").Buffer)
-},{"../util/rpc-cache-utils":297,"./subprovider.js":293,"buffer":51,"ethereumjs-tx":169,"ethereumjs-util":170,"util":279}],291:[function(require,module,exports){
+},{"../util/rpc-cache-utils":297,"./subprovider.js":293,"buffer":51,"vaporyjs-tx":169,"vaporyjs-util":170,"util":279}],291:[function(require,module,exports){
 (function (process,global){
 const xhr = (process.browser || global.XMLHttpRequest) ? require('xhr') : require('request')
 const inherits = require('util').inherits
@@ -34331,7 +34331,7 @@ RpcSource.prototype.handleRequest = function(payload, next, end){
 const inherits = require('util').inherits
 const Subprovider = require('./subprovider.js')
 const extend = require('xtend')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 
 module.exports = SanitizerSubprovider
 
@@ -34395,14 +34395,14 @@ function sanitize(value) {
       return value
     default:
       if (typeof value === 'string') {
-        return ethUtil.addHexPrefix(value.toLowerCase())
+        return vapUtil.addHexPrefix(value.toLowerCase())
       } else {
         return value
       }
   }
 }
 
-},{"./subprovider.js":293,"ethereumjs-util":170,"util":279,"xtend":281}],293:[function(require,module,exports){
+},{"./subprovider.js":293,"vaporyjs-util":170,"util":279,"xtend":281}],293:[function(require,module,exports){
 const createPayload = require('../util/create-payload.js')
 
 module.exports = SubProvider
@@ -34454,14 +34454,14 @@ module.exports = estimateGas
 
 /*
 
-This is a work around for https://github.com/ethereum/go-ethereum/issues/2577
+This is a work around for https://github.com/vapory/go-vapory/issues/2577
 
 */
 
 
 function estimateGas(provider, txParams, cb) {
   provider.sendAsync(createPayload({
-    method: 'eth_estimateGas',
+    method: 'vap_estimateGas',
     params: [txParams]
   }), function(err, res){
     if (err) {
@@ -34540,15 +34540,15 @@ function paramsWithoutBlockTag(payload){
 function blockTagParamIndex(payload){
   switch(payload.method) {
     // blockTag is second param
-    case 'eth_getBalance':
-    case 'eth_getCode':
-    case 'eth_getTransactionCount':
-    case 'eth_getStorageAt':
-    case 'eth_call':
-    case 'eth_estimateGas':
+    case 'vap_getBalance':
+    case 'vap_getCode':
+    case 'vap_getTransactionCount':
+    case 'vap_getStorageAt':
+    case 'vap_call':
+    case 'vap_estimateGas':
       return 1
     // blockTag is first param
-    case 'eth_getBlockByNumber':
+    case 'vap_getBlockByNumber':
       return 0
     // there is no blockTag
     default:
@@ -34561,40 +34561,40 @@ function cacheTypeForPayload(payload) {
     // cache permanently
     case 'web3_clientVersion':
     case 'web3_sha3':
-    case 'eth_protocolVersion':
-    case 'eth_getBlockTransactionCountByHash':
-    case 'eth_getUncleCountByBlockHash':
-    case 'eth_getCode':
-    case 'eth_getBlockByHash':
-    case 'eth_getTransactionByHash':
-    case 'eth_getTransactionByBlockHashAndIndex':
-    case 'eth_getTransactionReceipt':
-    case 'eth_getUncleByBlockHashAndIndex':
-    case 'eth_getCompilers':
-    case 'eth_compileLLL':
-    case 'eth_compileSolidity':
-    case 'eth_compileSerpent':
+    case 'vap_protocolVersion':
+    case 'vap_getBlockTransactionCountByHash':
+    case 'vap_getUncleCountByBlockHash':
+    case 'vap_getCode':
+    case 'vap_getBlockByHash':
+    case 'vap_getTransactionByHash':
+    case 'vap_getTransactionByBlockHashAndIndex':
+    case 'vap_getTransactionReceipt':
+    case 'vap_getUncleByBlockHashAndIndex':
+    case 'vap_getCompilers':
+    case 'vap_compileLLL':
+    case 'vap_compileSolidity':
+    case 'vap_compileSerpent':
     case 'shh_version':
       return 'perma'
 
     // cache until fork
-    case 'eth_getBlockByNumber':
-    case 'eth_getBlockTransactionCountByNumber':
-    case 'eth_getUncleCountByBlockNumber':
-    case 'eth_getTransactionByBlockNumberAndIndex':
-    case 'eth_getUncleByBlockNumberAndIndex':
+    case 'vap_getBlockByNumber':
+    case 'vap_getBlockTransactionCountByNumber':
+    case 'vap_getUncleCountByBlockNumber':
+    case 'vap_getTransactionByBlockNumberAndIndex':
+    case 'vap_getUncleByBlockNumberAndIndex':
       return 'fork'
 
     // cache for block
-    case 'eth_gasPrice':
-    case 'eth_blockNumber':
-    case 'eth_getBalance':
-    case 'eth_getStorageAt':
-    case 'eth_getTransactionCount':
-    case 'eth_call':
-    case 'eth_estimateGas':
-    case 'eth_getFilterLogs':
-    case 'eth_getLogs':
+    case 'vap_gasPrice':
+    case 'vap_blockNumber':
+    case 'vap_getBalance':
+    case 'vap_getStorageAt':
+    case 'vap_getTransactionCount':
+    case 'vap_call':
+    case 'vap_estimateGas':
+    case 'vap_getFilterLogs':
+    case 'vap_getLogs':
     case 'net_peerCount':
       return 'block'
 
@@ -34602,22 +34602,22 @@ function cacheTypeForPayload(payload) {
     case 'net_version':
     case 'net_peerCount':
     case 'net_listening':
-    case 'eth_syncing':
-    case 'eth_sign':
-    case 'eth_coinbase':
-    case 'eth_mining':
-    case 'eth_hashrate':
-    case 'eth_accounts':
-    case 'eth_sendTransaction':
-    case 'eth_sendRawTransaction':
-    case 'eth_newFilter':
-    case 'eth_newBlockFilter':
-    case 'eth_newPendingTransactionFilter':
-    case 'eth_uninstallFilter':
-    case 'eth_getFilterChanges':
-    case 'eth_getWork':
-    case 'eth_submitWork':
-    case 'eth_submitHashrate':
+    case 'vap_syncing':
+    case 'vap_sign':
+    case 'vap_coinbase':
+    case 'vap_mining':
+    case 'vap_hashrate':
+    case 'vap_accounts':
+    case 'vap_sendTransaction':
+    case 'vap_sendRawTransaction':
+    case 'vap_newFilter':
+    case 'vap_newBlockFilter':
+    case 'vap_newPendingTransactionFilter':
+    case 'vap_uninstallFilter':
+    case 'vap_getFilterChanges':
+    case 'vap_getWork':
+    case 'vap_submitWork':
+    case 'vap_submitHashrate':
     case 'db_putString':
     case 'db_getString':
     case 'db_putHex':
@@ -34724,7 +34724,7 @@ function ZeroClientProvider(opts){
     signTransaction: opts.signTransaction,
     publishTransaction: opts.publishTransaction,
     // messages
-    // old eth_sign
+    // old vap_sign
     processMessage: opts.processMessage,
     approveMessage: opts.approveMessage,
     signMessage: opts.signMessage,
