@@ -9,7 +9,7 @@ inherits(IpcSource, Subprovider)
 
 function IpcSource(opts) {
   const self = this
-  self.ipcPath = opts.ipcPath || '/root/.ethereum/geth.ipc'
+  self.ipcPath = opts.ipcPath || '/root/.vapory/gvap.ipc'
 }
 
 

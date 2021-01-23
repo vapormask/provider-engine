@@ -1,16 +1,16 @@
 # Web3 ProviderEngine
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/MetaMask/provider-engine.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/vapormask/provider-engine.svg)](https://greenkeeper.io/)
 
-Web3 ProviderEngine is a tool for composing your own [web3 providers](https://github.com/ethereum/wiki/wiki/JavaScript-API#web3).
+Web3 ProviderEngine is a tool for composing your own [web3 providers](https://github.com/vaporyco/wiki/wiki/JavaScript-API#web3).
 
 Status: WIP - expect breaking changes and strange behaviour
 
 ### Composable
 
-Built to be modular - works via a stack of 'sub-providers' which are like normal web3 providers but only handle a subset of rpc methods.
+Built to be modular - works via a stack of 'sub-providers' which are like normal web3 providers but only handle a subset of rpc mvapods.
 
-The subproviders can emit new rpc requests in order to handle their own;  e.g. `eth_call` may trigger `eth_getAccountBalance`, `eth_getCode`, and others.
+The subproviders can emit new rpc requests in order to handle their own;  e.g. `vap_call` may trigger `vap_getAccountBalance`, `vap_getCode`, and others.
 The provider engine also handles caching of rpc request results.
 
 ```js
@@ -30,9 +30,9 @@ var web3 = new Web3(engine)
 engine.addProvider(new FixtureSubprovider({
   web3_clientVersion: 'ProviderEngine/v0.0.0/javascript',
   net_listening: true,
-  eth_hashrate: '0x00',
-  eth_mining: false,
-  eth_syncing: true,
+  vap_hashrate: '0x00',
+  vap_mining: false,
+  vap_syncing: true,
 }))
 
 // cache layer
@@ -56,7 +56,7 @@ engine.addProvider(new HookedWalletSubprovider({
 
 // data source
 engine.addProvider(new RpcSubprovider({
-  rpcUrl: 'https://testrpc.metamask.io/',
+  rpcUrl: 'https://testrpc.vapormask.io/',
 }))
 
 // log new blocks
@@ -79,8 +79,8 @@ engine.start()
 
 ### Built For Zero-Clients
 
-The [Ethereum JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC) was not designed to have one node service many clients.
-However a smaller, lighter subset of the JSON RPC can be used to provide the blockchain data that an Ethereum 'zero-client' node would need to function.
+The [Vapory JSON RPC](https://github.com/vaporyco/wiki/wiki/JSON-RPC) was not designed to have one node service many clients.
+However a smaller, lighter subset of the JSON RPC can be used to provide the blockchain data that an Vapory 'zero-client' node would need to function.
 We handle as many types of requests locally as possible, and just let data lookups fallback to some data source ( hosted rpc, blockchain api, etc ).
 Categorically, we don’t want / can’t have the following types of RPC calls go to the network:
 * id mgmt + tx signing (requires private data)
@@ -91,11 +91,11 @@ Categorically, we don’t want / can’t have the following types of RPC calls g
 
 ##### 13.0.0
 
-- txs included in blocks via [`eth-block-tracker`](https://github.com/kumavis/eth-block-tracker)@2.0.0
+- txs included in blocks via [`vap-block-tracker`](https://github.com/kumavis/vap-block-tracker)@2.0.0
 
 ##### 12.0.0
 
-- moved block polling to [`eth-block-tracker`](https://github.com/kumavis/eth-block-tracker).
+- moved block polling to [`vap-block-tracker`](https://github.com/kumavis/vap-block-tracker).
 
 ##### 11.0.0
 
@@ -110,36 +110,36 @@ Categorically, we don’t want / can’t have the following types of RPC calls g
 - `pollingShouldUnref` option now defaults to false
 
 
-### Current RPC method support:
+### Current RPC mvapod support:
 
 ##### static
 - [x] web3_clientVersion
 - [x] net_version
 - [x] net_listening
 - [x] net_peerCount
-- [x] eth_protocolVersion
-- [x] eth_hashrate
-- [x] eth_mining
-- [x] eth_syncing
+- [x] vap_protocolVersion
+- [x] vap_hashrate
+- [x] vap_mining
+- [x] vap_syncing
 
 ##### filters
-- [x] eth_newBlockFilter
-- [x] eth_newPendingTransactionFilter
-- [x] eth_newFilter
-- [x] eth_uninstallFilter
-- [x] eth_getFilterLogs
-- [x] eth_getFilterChanges
+- [x] vap_newBlockFilter
+- [x] vap_newPendingTransactionFilter
+- [x] vap_newFilter
+- [x] vap_uninstallFilter
+- [x] vap_getFilterLogs
+- [x] vap_getFilterChanges
 
 ##### accounts manager
-- [x] eth_coinbase
-- [x] eth_accounts
-- [x] eth_sendTransaction
-- [x] eth_sign
-- [x] [eth_signTypedData](https://github.com/ethereum/EIPs/pull/712)
+- [x] vap_coinbase
+- [x] vap_accounts
+- [x] vap_sendTransaction
+- [x] vap_sign
+- [x] [vap_signTypedData](https://github.com/vaporyco/VIPs/pull/712)
 
 ##### vm
-- [x] eth_call
-- [x] eth_estimateGas
+- [x] vap_call
+- [x] vap_estimateGas
 
 ##### db source
 - [ ] db_putString
@@ -148,10 +148,10 @@ Categorically, we don’t want / can’t have the following types of RPC calls g
 - [ ] db_getHex
 
 ##### compiler
-- [ ] eth_getCompilers
-- [ ] eth_compileLLL
-- [ ] eth_compileSerpent
-- [ ] eth_compileSolidity
+- [ ] vap_getCompilers
+- [ ] vap_compileLLL
+- [ ] vap_compileSerpent
+- [ ] vap_compileSolidity
 
 ##### shh gateway
 - [ ] shh_version
@@ -162,28 +162,28 @@ Categorically, we don’t want / can’t have the following types of RPC calls g
 - [ ] shh_addToGroup
 
 ##### data source ( fallback to rpc )
-* eth_gasPrice
-* eth_blockNumber
-* eth_getBalance
-* eth_getBlockByHash
-* eth_getBlockByNumber
-* eth_getBlockTransactionCountByHash
-* eth_getBlockTransactionCountByNumber
-* eth_getCode
-* eth_getStorageAt
-* eth_getTransactionByBlockHashAndIndex
-* eth_getTransactionByBlockNumberAndIndex
-* eth_getTransactionByHash
-* eth_getTransactionCount
-* eth_getTransactionReceipt
-* eth_getUncleByBlockHashAndIndex
-* eth_getUncleByBlockNumberAndIndex
-* eth_getUncleCountByBlockHash
-* eth_getUncleCountByBlockNumber
-* eth_sendRawTransaction
-* eth_getLogs ( not used in web3.js )
+* vap_gasPrice
+* vap_blockNumber
+* vap_getBalance
+* vap_getBlockByHash
+* vap_getBlockByNumber
+* vap_getBlockTransactionCountByHash
+* vap_getBlockTransactionCountByNumber
+* vap_getCode
+* vap_getStorageAt
+* vap_getTransactionByBlockHashAndIndex
+* vap_getTransactionByBlockNumberAndIndex
+* vap_getTransactionByHash
+* vap_getTransactionCount
+* vap_getTransactionReceipt
+* vap_getUncleByBlockHashAndIndex
+* vap_getUncleByBlockNumberAndIndex
+* vap_getUncleCountByBlockHash
+* vap_getUncleCountByBlockNumber
+* vap_sendRawTransaction
+* vap_getLogs ( not used in web3.js )
 
 ##### ( not supported )
-* eth_getWork
-* eth_submitWork
-* eth_submitHashrate ( not used in web3.js )
+* vap_getWork
+* vap_submitWork
+* vap_submitHashrate ( not used in web3.js )

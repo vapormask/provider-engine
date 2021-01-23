@@ -1,11 +1,11 @@
 'use strict'
 
 const inherits = require('util').inherits
-const HookedWalletEthTxSubprovider = require('./hooked-wallet-ethtx.js')
+const HookedWalletVapTxSubprovider = require('./hooked-wallet-ethtx.js')
 
 module.exports = WalletSubprovider
 
-inherits(WalletSubprovider, HookedWalletEthTxSubprovider)
+inherits(WalletSubprovider, HookedWalletVapTxSubprovider)
 
 function WalletSubprovider (wallet, opts) {
   opts.getAccounts = function (cb) {

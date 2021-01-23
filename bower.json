@@ -7,11 +7,11 @@
   ],
   "license": "ISC",
   "keywords": [
-    "Ethereum",
+    "Vapory",
     "Web3",
     "Provider"
   ],
-  "homepage": "https://github.com/MetaMask/provider-engine",
+  "homepage": "https://github.com/Vapormask/provider-engine",
   "ignore": [
     "**/.*",
     "node_modules",

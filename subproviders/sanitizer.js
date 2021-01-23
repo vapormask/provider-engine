@@ -6,7 +6,7 @@
 const inherits = require('util').inherits
 const Subprovider = require('./subprovider.js')
 const extend = require('xtend')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 
 module.exports = SanitizerSubprovider
 
@@ -70,7 +70,7 @@ function sanitize(value) {
       return value
     default:
       if (typeof value === 'string') {
-        return ethUtil.addHexPrefix(value.toLowerCase())
+        return vapUtil.addHexPrefix(value.toLowerCase())
       } else {
         return value
       }

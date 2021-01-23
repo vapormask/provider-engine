@@ -1,6 +1,6 @@
 const test = require('tape')
 const async = require('async')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const ProviderEngine = require('../../index.js')
 const VmSubprovider = require('../../subproviders/vm')
 const TestBlockProvider = require('../util/block.js')
@@ -8,7 +8,7 @@ const RpcSubprovider = require('../../subproviders/rpc')
 const createPayload = require('../../util/create-payload.js')
 const rpcHexEncoding = require('../../util/rpc-hex-encoding.js')
 
-test('binary search eth_estimateGas implementation', function(t) {
+test('binary search vap_estimateGas implementation', function(t) {
     var gasNeededScenarios = [
         {
             gasNeeded: 5,
@@ -38,7 +38,7 @@ test('binary search eth_estimateGas implementation', function(t) {
                 cb(new Error('fake out of gas'))
             } else {
                 cb(null, {
-                    gasUsed: ethUtil.toBuffer(scenario.gasNeeded),
+                    gasUsed: vapUtil.toBuffer(scenario.gasNeeded),
                 });
             }
         }
@@ -46,7 +46,7 @@ test('binary search eth_estimateGas implementation', function(t) {
         engine.addProvider(new TestBlockProvider());
         engine.start()
         engine.sendAsync(createPayload({
-          method: 'eth_estimateGas',
+          method: 'vap_estimateGas',
           params: [{}, 'latest'],
         }), function(err, response) {
           t.ifError(err, 'did not error')

@@ -1,7 +1,7 @@
 const EventEmitter = require('events').EventEmitter
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
-const EthBlockTracker = require('eth-block-tracker')
+const vapUtil = require('vaporyjs-util')
+const VapBlockTracker = require('vap-block-tracker')
 const map = require('async/map')
 const eachSeries = require('async/eachSeries')
 const Stoplight = require('./util/stoplight.js')
@@ -21,7 +21,7 @@ function Web3ProviderEngine(opts) {
   opts = opts || {}
   // block polling
   const skipInitBlockProvider = { sendAsync: self._handleAsync.bind(self) }
-  self._blockTracker = new EthBlockTracker({
+  self._blockTracker = new VapBlockTracker({
     provider: skipInitBlockProvider,
     pollingInterval: opts.pollingInterval || 4000,
   })
@@ -165,23 +165,23 @@ Web3ProviderEngine.prototype._setCurrentBlock = function(block){
 
 function toBufferBlock (jsonBlock) {
   return {
-    number:           ethUtil.toBuffer(jsonBlock.number),
-    hash:             ethUtil.toBuffer(jsonBlock.hash),
-    parentHash:       ethUtil.toBuffer(jsonBlock.parentHash),
-    nonce:            ethUtil.toBuffer(jsonBlock.nonce),
-    sha3Uncles:       ethUtil.toBuffer(jsonBlock.sha3Uncles),
-    logsBloom:        ethUtil.toBuffer(jsonBlock.logsBloom),
-    transactionsRoot: ethUtil.toBuffer(jsonBlock.transactionsRoot),
-    stateRoot:        ethUtil.toBuffer(jsonBlock.stateRoot),
-    receiptsRoot:     ethUtil.toBuffer(jsonBlock.receiptRoot || jsonBlock.receiptsRoot),
-    miner:            ethUtil.toBuffer(jsonBlock.miner),
-    difficulty:       ethUtil.toBuffer(jsonBlock.difficulty),
-    totalDifficulty:  ethUtil.toBuffer(jsonBlock.totalDifficulty),
-    size:             ethUtil.toBuffer(jsonBlock.size),
-    extraData:        ethUtil.toBuffer(jsonBlock.extraData),
-    gasLimit:         ethUtil.toBuffer(jsonBlock.gasLimit),
-    gasUsed:          ethUtil.toBuffer(jsonBlock.gasUsed),
-    timestamp:        ethUtil.toBuffer(jsonBlock.timestamp),
+    number:           vapUtil.toBuffer(jsonBlock.number),
+    hash:             vapUtil.toBuffer(jsonBlock.hash),
+    parentHash:       vapUtil.toBuffer(jsonBlock.parentHash),
+    nonce:            vapUtil.toBuffer(jsonBlock.nonce),
+    sha3Uncles:       vapUtil.toBuffer(jsonBlock.sha3Uncles),
+    logsBloom:        vapUtil.toBuffer(jsonBlock.logsBloom),
+    transactionsRoot: vapUtil.toBuffer(jsonBlock.transactionsRoot),
+    stateRoot:        vapUtil.toBuffer(jsonBlock.stateRoot),
+    receiptsRoot:     vapUtil.toBuffer(jsonBlock.receiptRoot || jsonBlock.receiptsRoot),
+    miner:            vapUtil.toBuffer(jsonBlock.miner),
+    difficulty:       vapUtil.toBuffer(jsonBlock.difficulty),
+    totalDifficulty:  vapUtil.toBuffer(jsonBlock.totalDifficulty),
+    size:             vapUtil.toBuffer(jsonBlock.size),
+    extraData:        vapUtil.toBuffer(jsonBlock.extraData),
+    gasLimit:         vapUtil.toBuffer(jsonBlock.gasLimit),
+    gasUsed:          vapUtil.toBuffer(jsonBlock.gasUsed),
+    timestamp:        vapUtil.toBuffer(jsonBlock.timestamp),
     transactions:     jsonBlock.transactions,
   }
 }

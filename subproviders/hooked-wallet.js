@@ -1,5 +1,5 @@
 /*
- * Emulate 'eth_accounts' / 'eth_sendTransaction' using 'eth_sendRawTransaction'
+ * Emulate 'vap_accounts' / 'vap_sendTransaction' using 'vap_sendRawTransaction'
  *
  * The two callbacks a user needs to implement are:
  * - getAccounts() -- array of addresses supported
@@ -9,8 +9,8 @@
 const waterfall = require('async/waterfall')
 const parallel = require('async/parallel')
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
-const sigUtil = require('eth-sig-util')
+const vapUtil = require('vaporyjs-util')
+const sigUtil = require('vap-sig-util')
 const extend = require('xtend')
 const Semaphore = require('semaphore')
 const Subprovider = require('./subprovider.js')
@@ -20,17 +20,17 @@ const hexRegex = /^[0-9A-Fa-f]+$/g
 module.exports = HookedWalletSubprovider
 
 // handles the following RPC methods:
-//   eth_coinbase
-//   eth_accounts
-//   eth_sendTransaction
-//   eth_sign
+//   vap_coinbase
+//   vap_accounts
+//   vap_sendTransaction
+//   vap_sign
 //   personal_sign
 //   personal_ecRecover
 
 //
 // Tx Signature Flow
 //
-// handleRequest: eth_sendTransaction
+// handleRequest: vap_sendTransaction
 //   validateTransaction (basic validity check)
 //     validateSender (checks that sender is in accounts)
 //   processTransaction (sign tx and submit to network)
@@ -79,7 +79,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
 
   switch(payload.method) {
 
-    case 'eth_coinbase':
+    case 'vap_coinbase':
       self.getAccounts(function(err, accounts){
         if (err) return end(err)
         var result = accounts[0] || null
@@ -87,14 +87,14 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       })
       return
 
-    case 'eth_accounts':
+    case 'vap_accounts':
       self.getAccounts(function(err, accounts){
         if (err) return end(err)
         end(null, accounts)
       })
       return
 
-    case 'eth_sendTransaction':
+    case 'vap_sendTransaction':
       var txParams = payload.params[0]
       waterfall([
         (cb) => self.validateTransaction(txParams, cb),
@@ -102,7 +102,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       ], end)
       return
 
-    case 'eth_signTransaction':
+    case 'vap_signTransaction':
       var txParams = payload.params[0]
       waterfall([
         (cb) => self.validateTransaction(txParams, cb),
@@ -110,7 +110,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       ], end)
       return
 
-    case 'eth_sign':
+    case 'vap_sign':
       var address = payload.params[0]
       var message = payload.params[1]
       // non-standard "extraParams" to be appended to our "msgParams" obj
@@ -140,7 +140,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       // That means when the first param is definitely an address,
       // and the second param is definitely not, but is hex.
       if (resemblesData(second) && resemblesAddress(first)) {
-        let warning = `The eth_personalSign method requires params ordered `
+        let warning = `The vap_personalSign method requires params ordered `
         warning += `[message, address]. This was previously handled incorrectly, `
         warning += `and has been corrected automatically. `
         warning += `Please switch this param order for smooth behavior in the future.`
@@ -179,7 +179,7 @@ HookedWalletSubprovider.prototype.handleRequest = function(payload, next, end){
       self.recoverPersonalSignature(msgParams, end)
       return
 
-    case 'eth_signTypedData':
+    case 'vap_signTypedData':
       message = payload.params[0]
       address = payload.params[1]
       var extraParams = payload.params[2] || {}
@@ -387,7 +387,7 @@ HookedWalletSubprovider.prototype.finalizeTx = function(txParams, cb) {
 HookedWalletSubprovider.prototype.publishTransaction = function(rawTx, cb) {
   const self = this
   self.emitPayload({
-    method: 'eth_sendRawTransaction',
+    method: 'vap_sendRawTransaction',
     params: [rawTx],
   }, function(err, res){
     if (err) return cb(err)
@@ -404,12 +404,12 @@ HookedWalletSubprovider.prototype.fillInTxExtras = function(txParams, cb){
 
   if (txParams.gasPrice === undefined) {
     // console.log("need to get gasprice")
-    reqs.gasPrice = self.emitPayload.bind(self, { method: 'eth_gasPrice', params: [] })
+    reqs.gasPrice = self.emitPayload.bind(self, { method: 'vap_gasPrice', params: [] })
   }
 
   if (txParams.nonce === undefined) {
     // console.log("need to get nonce")
-    reqs.nonce = self.emitPayload.bind(self, { method: 'eth_getTransactionCount', params: [address, 'pending'] })
+    reqs.nonce = self.emitPayload.bind(self, { method: 'vap_getTransactionCount', params: [address, 'pending'] })
   }
 
   if (txParams.gas === undefined) {
@@ -450,16 +450,16 @@ function toLowerCase(string){
 }
 
 function resemblesAddress (string) {
-  const fixed = ethUtil.addHexPrefix(string)
-  const isValid = ethUtil.isValidAddress(fixed)
+  const fixed = vapUtil.addHexPrefix(string)
+  const isValid = vapUtil.isValidAddress(fixed)
   return isValid
 }
 
 // Returns true if resembles hex data
 // but definitely not a valid address.
 function resemblesData (string) {
-  const fixed = ethUtil.addHexPrefix(string)
-  const isValidAddress = ethUtil.isValidAddress(fixed)
+  const fixed = vapUtil.addHexPrefix(string)
+  const isValidAddress = vapUtil.isValidAddress(fixed)
   return !isValidAddress && isValidHex(string)
 }
 

@@ -39,8 +39,8 @@ function paramsWithoutBlockTag(payload){
     return payload.params;
   }
 
-  // eth_getBlockByNumber has the block tag first, then the optional includeTx? param
-  if (payload.method === 'eth_getBlockByNumber') {
+  // vap_getBlockByNumber has the block tag first, then the optional includeTx? param
+  if (payload.method === 'vap_getBlockByNumber') {
     return payload.params.slice(1);
   }
 
@@ -50,15 +50,15 @@ function paramsWithoutBlockTag(payload){
 function blockTagParamIndex(payload){
   switch(payload.method) {
     // blockTag is second param
-    case 'eth_getBalance':
-    case 'eth_getCode':
-    case 'eth_getTransactionCount':
-    case 'eth_getStorageAt':
-    case 'eth_call':
-    case 'eth_estimateGas':
+    case 'vap_getBalance':
+    case 'vap_getCode':
+    case 'vap_getTransactionCount':
+    case 'vap_getStorageAt':
+    case 'vap_call':
+    case 'vap_estimateGas':
       return 1
     // blockTag is first param
-    case 'eth_getBlockByNumber':
+    case 'vap_getBlockByNumber':
       return 0
     // there is no blockTag
     default:
@@ -71,40 +71,40 @@ function cacheTypeForPayload(payload) {
     // cache permanently
     case 'web3_clientVersion':
     case 'web3_sha3':
-    case 'eth_protocolVersion':
-    case 'eth_getBlockTransactionCountByHash':
-    case 'eth_getUncleCountByBlockHash':
-    case 'eth_getCode':
-    case 'eth_getBlockByHash':
-    case 'eth_getTransactionByHash':
-    case 'eth_getTransactionByBlockHashAndIndex':
-    case 'eth_getTransactionReceipt':
-    case 'eth_getUncleByBlockHashAndIndex':
-    case 'eth_getCompilers':
-    case 'eth_compileLLL':
-    case 'eth_compileSolidity':
-    case 'eth_compileSerpent':
+    case 'vap_protocolVersion':
+    case 'vap_getBlockTransactionCountByHash':
+    case 'vap_getUncleCountByBlockHash':
+    case 'vap_getCode':
+    case 'vap_getBlockByHash':
+    case 'vap_getTransactionByHash':
+    case 'vap_getTransactionByBlockHashAndIndex':
+    case 'vap_getTransactionReceipt':
+    case 'vap_getUncleByBlockHashAndIndex':
+    case 'vap_getCompilers':
+    case 'vap_compileLLL':
+    case 'vap_compileSolidity':
+    case 'vap_compileSerpent':
     case 'shh_version':
       return 'perma'
 
     // cache until fork
-    case 'eth_getBlockByNumber':
-    case 'eth_getBlockTransactionCountByNumber':
-    case 'eth_getUncleCountByBlockNumber':
-    case 'eth_getTransactionByBlockNumberAndIndex':
-    case 'eth_getUncleByBlockNumberAndIndex':
+    case 'vap_getBlockByNumber':
+    case 'vap_getBlockTransactionCountByNumber':
+    case 'vap_getUncleCountByBlockNumber':
+    case 'vap_getTransactionByBlockNumberAndIndex':
+    case 'vap_getUncleByBlockNumberAndIndex':
       return 'fork'
 
     // cache for block
-    case 'eth_gasPrice':
-    case 'eth_blockNumber':
-    case 'eth_getBalance':
-    case 'eth_getStorageAt':
-    case 'eth_getTransactionCount':
-    case 'eth_call':
-    case 'eth_estimateGas':
-    case 'eth_getFilterLogs':
-    case 'eth_getLogs':
+    case 'vap_gasPrice':
+    case 'vap_blockNumber':
+    case 'vap_getBalance':
+    case 'vap_getStorageAt':
+    case 'vap_getTransactionCount':
+    case 'vap_call':
+    case 'vap_estimateGas':
+    case 'vap_getFilterLogs':
+    case 'vap_getLogs':
     case 'net_peerCount':
       return 'block'
 
@@ -112,22 +112,22 @@ function cacheTypeForPayload(payload) {
     case 'net_version':
     case 'net_peerCount':
     case 'net_listening':
-    case 'eth_syncing':
-    case 'eth_sign':
-    case 'eth_coinbase':
-    case 'eth_mining':
-    case 'eth_hashrate':
-    case 'eth_accounts':
-    case 'eth_sendTransaction':
-    case 'eth_sendRawTransaction':
-    case 'eth_newFilter':
-    case 'eth_newBlockFilter':
-    case 'eth_newPendingTransactionFilter':
-    case 'eth_uninstallFilter':
-    case 'eth_getFilterChanges':
-    case 'eth_getWork':
-    case 'eth_submitWork':
-    case 'eth_submitHashrate':
+    case 'vap_syncing':
+    case 'vap_sign':
+    case 'vap_coinbase':
+    case 'vap_mining':
+    case 'vap_hashrate':
+    case 'vap_accounts':
+    case 'vap_sendTransaction':
+    case 'vap_sendRawTransaction':
+    case 'vap_newFilter':
+    case 'vap_newBlockFilter':
+    case 'vap_newPendingTransactionFilter':
+    case 'vap_uninstallFilter':
+    case 'vap_getFilterChanges':
+    case 'vap_getWork':
+    case 'vap_submitWork':
+    case 'vap_submitHashrate':
     case 'db_putString':
     case 'db_getString':
     case 'db_putHex':
