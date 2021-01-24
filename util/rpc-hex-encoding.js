@@ -1,4 +1,4 @@
-const vapUtil = require('vaporycojs-util')
+const vapUtil = require('vaporyjs-util')
 const assert = require('./assert.js')
 
 module.exports = {
