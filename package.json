@@ -16,7 +16,7 @@
     "async": "^2.5.0",
     "clone": "^2.0.0",
     "vap-sig-util": "1.4.2",
-    "vap-block-tracker": "2.2.2",
+    "vap-block-tracker": "2.2.2-a",
     "vaporyjs-block": "1.2.2",
     "vaporyjs-tx": "1.2.0",
     "vaporyjs-util": "5.1.1",
