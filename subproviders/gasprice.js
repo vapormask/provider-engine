@@ -2,9 +2,9 @@
  * Calculate gasPrice based on last blocks.
  * @author github.com/axic
  *
- * FIXME: support minimum suggested gas and perhaps other options from geth:
- * https://github.com/ethereum/go-ethereum/blob/master/eth/gasprice.go
- * https://github.com/ethereum/go-ethereum/wiki/Gas-Price-Oracle
+ * FIXME: support minimum suggested gas and perhaps other options from gvap:
+ * https://github.com/vaporyco/go-vapory/blob/master/vap/gasprice.go
+ * https://github.com/vaporyco/go-vapory/wiki/Gas-Price-Oracle
  */
 
 const map = require('async/map')
@@ -21,12 +21,12 @@ function GaspriceProvider(opts) {
 }
 
 GaspriceProvider.prototype.handleRequest = function(payload, next, end){
-  if (payload.method !== 'eth_gasPrice')
+  if (payload.method !== 'vap_gasPrice')
     return next()
 
   const self = this
 
-  self.emitPayload({ method: 'eth_blockNumber' }, function(err, res) {
+  self.emitPayload({ method: 'vap_blockNumber' }, function(err, res) {
     // FIXME: convert number using a bignum library
     var lastBlock = parseInt(res.result, 16)
     var blockNumbers = [ ]
@@ -36,7 +36,7 @@ GaspriceProvider.prototype.handleRequest = function(payload, next, end){
     }
 
     function getBlock(item, end) {
-      self.emitPayload({ method: 'eth_getBlockByNumber', params: [ item, true ] }, function(err, res) {
+      self.emitPayload({ method: 'vap_getBlockByNumber', params: [ item, true ] }, function(err, res) {
         if (err) return end(err)
         end(null, res.result.transactions)
       })

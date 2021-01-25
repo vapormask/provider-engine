@@ -1,10 +1,10 @@
 const doWhilst = require('async/doWhilst')
 const inherits = require('util').inherits
 const Stoplight = require('../util/stoplight.js')
-const createVm = require('ethereumjs-vm/lib/hooked').fromWeb3Provider
-const Block = require('ethereumjs-block')
-const FakeTransaction = require('ethereumjs-tx/fake.js')
-const ethUtil = require('ethereumjs-util')
+const createVm = require('vaporyjs-vm/lib/hooked').fromWeb3Provider
+const Block = require('vaporyjs-block')
+const FakeTransaction = require('vaporyjs-tx/fake.js')
+const vapUtil = require('vaporyjs-util')
 const createPayload = require('../util/create-payload.js')
 const rpcHexEncoding = require('../util/rpc-hex-encoding.js')
 const Subprovider = require('./subprovider.js')
@@ -12,8 +12,8 @@ const Subprovider = require('./subprovider.js')
 module.exports = VmSubprovider
 
 // handles the following RPC methods:
-//   eth_call
-//   eth_estimateGas
+//   vap_call
+//   vap_estimateGas
 
 
 inherits(VmSubprovider, Subprovider)
@@ -21,7 +21,7 @@ inherits(VmSubprovider, Subprovider)
 function VmSubprovider(opts){
   const self = this
   self.opts = opts || {};
-  self.methods = ['eth_call', 'eth_estimateGas']
+  self.methods = ['vap_call', 'vap_estimateGas']
   // set initialization blocker
   self._ready = new Stoplight()
   self._blockGasLimit = null
@@ -33,7 +33,7 @@ VmSubprovider.prototype.setEngine = function(engine) {
   Subprovider.prototype.setEngine.call(self, engine)
   // unblock initialization after first block
   engine.once('block', function(block) {
-    self._blockGasLimit = ethUtil.bufferToInt(block.gasLimit)
+    self._blockGasLimit = vapUtil.bufferToInt(block.gasLimit)
     self._ready.go()
   })
 }
@@ -46,18 +46,18 @@ VmSubprovider.prototype.handleRequest = function(payload, next, end) {
   const self = this
   switch (payload.method) {
 
-    case 'eth_call':
+    case 'vap_call':
       self.runVm(payload, function(err, results){
         if (err) return end(err)
         var result = '0x'
         if (!results.error && results.vm.return) {
-          result = ethUtil.addHexPrefix(results.vm.return.toString('hex'))
+          result = vapUtil.addHexPrefix(results.vm.return.toString('hex'))
         }
         end(null, result)
       })
       return
 
-    case 'eth_estimateGas':
+    case 'vap_estimateGas':
       self.estimateGas(payload, end)
       return
   }
@@ -76,7 +76,7 @@ VmSubprovider.prototype.estimateGas = function(payload, end) {
         var mid = (hi + lo) / 2
         payload.params[0].gas = mid
         self.runVm(payload, function(err, results) {
-            gasUsed = err ? self._blockGasLimit : ethUtil.bufferToInt(results.gasUsed)
+            gasUsed = err ? self._blockGasLimit : vapUtil.bufferToInt(results.gasUsed)
             if (err || gasUsed === 0) {
                 lo = mid
             } else {
@@ -110,7 +110,7 @@ VmSubprovider.prototype.runVm = function(payload, cb){
 
   var blockData = self.currentBlock
   var block = blockFromBlockData(blockData)
-  var blockNumber = ethUtil.addHexPrefix(blockData.number.toString('hex'))
+  var blockNumber = vapUtil.addHexPrefix(blockData.number.toString('hex'))
 
   // create vm with state lookup intercepted
   var vm = self.vm = createVm(self.engine, blockNumber, {
@@ -128,13 +128,13 @@ VmSubprovider.prototype.runVm = function(payload, cb){
   // console.log('params:', payload.params)
 
   const normalizedTxParams = {
-    to: txParams.to ? ethUtil.addHexPrefix(txParams.to) : undefined,
-    from: txParams.from ? ethUtil.addHexPrefix(txParams.from) : undefined,
-    value: txParams.value ? ethUtil.addHexPrefix(txParams.value) : undefined,
-    data: txParams.data ? ethUtil.addHexPrefix(txParams.data) : undefined,
-    gasLimit: txParams.gas ? ethUtil.addHexPrefix(txParams.gas) : block.header.gasLimit,
-    gasPrice: txParams.gasPrice ? ethUtil.addHexPrefix(txParams.gasPrice) : undefined,
-    nonce: txParams.nonce ? ethUtil.addHexPrefix(txParams.nonce) : undefined,
+    to: txParams.to ? vapUtil.addHexPrefix(txParams.to) : undefined,
+    from: txParams.from ? vapUtil.addHexPrefix(txParams.from) : undefined,
+    value: txParams.value ? vapUtil.addHexPrefix(txParams.value) : undefined,
+    data: txParams.data ? vapUtil.addHexPrefix(txParams.data) : undefined,
+    gasLimit: txParams.gas ? vapUtil.addHexPrefix(txParams.gas) : block.header.gasLimit,
+    gasPrice: txParams.gasPrice ? vapUtil.addHexPrefix(txParams.gasPrice) : undefined,
+    nonce: txParams.nonce ? vapUtil.addHexPrefix(txParams.nonce) : undefined,
   }
   var tx = new FakeTransaction(normalizedTxParams)
   tx._from = normalizedTxParams.from || '0x0000000000000000000000000000000000000000'
@@ -160,7 +160,7 @@ VmSubprovider.prototype.runVm = function(payload, cb){
 
 function blockFromBlockData(blockData){
   var block = new Block()
-  // block.header.hash = ethUtil.addHexPrefix(blockData.hash.toString('hex'))
+  // block.header.hash = vapUtil.addHexPrefix(blockData.hash.toString('hex'))
 
   block.header.parentHash = blockData.parentHash
   block.header.uncleHash = blockData.sha3Uncles

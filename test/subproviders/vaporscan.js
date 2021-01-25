@@ -1,18 +1,18 @@
-const sha3 = require('ethereumjs-util').sha3;
+const sha3 = require('vaporyjs-util').sha3;
 const test = require('tape')
 const ProviderEngine = require('../../index.js')
 const createPayload = require('../../util/create-payload.js')
-const EtherscanSubprovider = require('../../subproviders/etherscan')
+const VaporscanSubprovider = require('../../subproviders/vaporscan')
 
-test('etherscan eth_getBlockTransactionCountByNumber', function(t) {
+test('vaporscan vap_getBlockTransactionCountByNumber', function(t) {
   t.plan(3)
 
   var engine = new ProviderEngine()
-  var etherscan = new EtherscanSubprovider()
-  engine.addProvider(etherscan)
+  var vaporscan = new VaporscanSubprovider()
+  engine.addProvider(vaporscan)
   engine.start()
   engine.sendAsync(createPayload({
-    method: 'eth_getBlockTransactionCountByNumber',
+    method: 'vap_getBlockTransactionCountByNumber',
     params: [
       '0x132086'
     ],
@@ -24,15 +24,15 @@ test('etherscan eth_getBlockTransactionCountByNumber', function(t) {
   })
 })
 
-test('etherscan eth_getTransactionByHash', function(t) {
+test('vaporscan vap_getTransactionByHash', function(t) {
   t.plan(3)
 
   var engine = new ProviderEngine()
-  var etherscan = new EtherscanSubprovider()
-  engine.addProvider(etherscan)
+  var vaporscan = new VaporscanSubprovider()
+  engine.addProvider(vaporscan)
   engine.start()
   engine.sendAsync(createPayload({
-    method: 'eth_getTransactionByHash',
+    method: 'vap_getTransactionByHash',
     params: [
       '0xe420d77c4f8b5bf95021fa049b634d5e3f051752a14fb7c6a8f1333c37cdf817'
     ],
@@ -44,15 +44,15 @@ test('etherscan eth_getTransactionByHash', function(t) {
   })
 })
 
-test('etherscan eth_blockNumber', function(t) {
+test('vaporscan vap_blockNumber', function(t) {
   t.plan(3)
 
   var engine = new ProviderEngine()
-  var etherscan = new EtherscanSubprovider()
-  engine.addProvider(etherscan)
+  var vaporscan = new VaporscanSubprovider()
+  engine.addProvider(vaporscan)
   engine.start()
   engine.sendAsync(createPayload({
-    method: 'eth_blockNumber',
+    method: 'vap_blockNumber',
     params: [],
   }), function(err, response){
     t.ifError(err, 'throw no error')
@@ -62,15 +62,15 @@ test('etherscan eth_blockNumber', function(t) {
   })
 })
 
-test('etherscan eth_getBlockByNumber', function(t) {
+test('vaporscan vap_getBlockByNumber', function(t) {
   t.plan(3)
 
   var engine = new ProviderEngine()
-  var etherscan = new EtherscanSubprovider()
-  engine.addProvider(etherscan)
+  var vaporscan = new VaporscanSubprovider()
+  engine.addProvider(vaporscan)
   engine.start()
   engine.sendAsync(createPayload({
-    method: 'eth_getBlockByNumber',
+    method: 'vap_getBlockByNumber',
     params: [
       '0x149a2a',
       true
@@ -83,15 +83,15 @@ test('etherscan eth_getBlockByNumber', function(t) {
   })
 })
 
-test('etherscan eth_getBalance', function(t) {
+test('vaporscan vap_getBalance', function(t) {
   t.plan(3)
 
   var engine = new ProviderEngine()
-  var etherscan = new EtherscanSubprovider()
-  engine.addProvider(etherscan)
+  var vaporscan = new VaporscanSubprovider()
+  engine.addProvider(vaporscan)
   engine.start()
   engine.sendAsync(createPayload({
-    method: 'eth_getBalance',
+    method: 'vap_getBalance',
     params: [
       '0xa601ea86ae7297e78a54f4b6937fbc222b9d87f4',
       'latest'
@@ -104,16 +104,16 @@ test('etherscan eth_getBalance', function(t) {
   })
 })
 
-test('etherscan eth_call', function(t) {
+test('vaporscan vap_call', function(t) {
   t.plan(3)
 
   var signature = Buffer.concat([sha3("getLatestBlock()", 256)], 4).toString('hex');
   var engine = new ProviderEngine()
-  var etherscan = new EtherscanSubprovider()
-  engine.addProvider(etherscan)
+  var vaporscan = new VaporscanSubprovider()
+  engine.addProvider(vaporscan)
   engine.start()
   engine.sendAsync(createPayload({
-    method: 'eth_call',
+    method: 'vap_call',
     params: [{
       to: '0x4EECf99D543B278106ac0c0e8ffe616F2137f10a',
       data : signature
@@ -123,7 +123,7 @@ test('etherscan eth_call', function(t) {
   }), function(err, response){
     t.ifError(err, 'throw no error')
     t.ok(response, 'has response')
-    t.notEqual(response.result, '0x', 'eth_call to getLatestBlock() does not equal 0x')
+    t.notEqual(response.result, '0x', 'vap_call to getLatestBlock() does not equal 0x')
     t.end()
   })
 })

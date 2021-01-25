@@ -1,36 +1,36 @@
 /*
- * Etherscan.io API connector
+ * Vaporscan.io API connector
  * @author github.com/axic
  *
- * The etherscan.io API supports:
+ * The vaporscan.io API supports:
  *
  * 1) Natively via proxy methods
- * - eth_blockNumber *
- * - eth_getBlockByNumber *
- * - eth_getBlockTransactionCountByNumber
+ * - vap_blockNumber *
+ * - vap_getBlockByNumber *
+ * - vap_getBlockTransactionCountByNumber
  * - getTransactionByHash
  * - getTransactionByBlockNumberAndIndex
- * - eth_getTransactionCount *
- * - eth_sendRawTransaction *
- * - eth_call *
- * - eth_getTransactionReceipt *
- * - eth_getCode *
- * - eth_getStorageAt *
+ * - vap_getTransactionCount *
+ * - vap_sendRawTransaction *
+ * - vap_call *
+ * - vap_getTransactionReceipt *
+ * - vap_getCode *
+ * - vap_getStorageAt *
  *
  * 2) Via non-native methods
- * - eth_getBalance
- * - eth_listTransactions (non-standard)
+ * - vap_getBalance
+ * - vap_listTransactions (non-standard)
  */
 
 const xhr = process.browser ? require('xhr') : require('request')
 const inherits = require('util').inherits
 const Subprovider = require('./subprovider.js')
 
-module.exports = EtherscanProvider
+module.exports = VaporscanProvider
 
-inherits(EtherscanProvider, Subprovider)
+inherits(VaporscanProvider, Subprovider)
 
-function EtherscanProvider(opts) {
+function VaporscanProvider(opts) {
   opts = opts || {}
   this.network = opts.network || 'api'
   this.proto = (opts.https || false) ? 'https' : 'http'
@@ -42,7 +42,7 @@ function EtherscanProvider(opts) {
   setInterval(this.handleRequests, this.interval, this);
 }
 
-EtherscanProvider.prototype.handleRequests = function(self){
+VaporscanProvider.prototype.handleRequests = function(self){
 	if(self.requests.length == 0) return;
 	
 	//console.log('Handling the next ' + self.times + ' of ' + self.requests.length + ' requests');
@@ -55,7 +55,7 @@ EtherscanProvider.prototype.handleRequests = function(self){
 	}
 }
 
-EtherscanProvider.prototype.handleRequest = function(payload, next, end){
+VaporscanProvider.prototype.handleRequest = function(payload, next, end){
   var requestObject = {proto: this.proto, network: this.network, payload: payload, next: next, end: end},
 	  self = this;
   
@@ -72,35 +72,35 @@ EtherscanProvider.prototype.handleRequest = function(payload, next, end){
 
 function handlePayload(proto, network, payload, next, end){
   switch(payload.method) {
-    case 'eth_blockNumber':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_blockNumber', {}, end)
+    case 'vap_blockNumber':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_blockNumber', {}, end)
       return
 
-    case 'eth_getBlockByNumber':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getBlockByNumber', {
+    case 'vap_getBlockByNumber':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getBlockByNumber', {
         tag: payload.params[0],
         boolean: payload.params[1] }, end)
       return
 
-    case 'eth_getBlockTransactionCountByNumber':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getBlockTransactionCountByNumber', {
+    case 'vap_getBlockTransactionCountByNumber':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getBlockTransactionCountByNumber', {
         tag: payload.params[0]
       }, end)
       return
 
-    case 'eth_getTransactionByHash':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getTransactionByHash', {
+    case 'vap_getTransactionByHash':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getTransactionByHash', {
         txhash: payload.params[0]
       }, end)
       return
 
-    case 'eth_getBalance':
-      etherscanXHR(true, proto, network, 'account', 'balance', {
+    case 'vap_getBalance':
+      vaporscanXHR(true, proto, network, 'account', 'balance', {
         address: payload.params[0],
         tag: payload.params[1] }, end)
       return
 
-    case 'eth_listTransactions':
+    case 'vap_listTransactions':
       const props = [
         'address',
         'startblock',
@@ -115,34 +115,34 @@ function handlePayload(proto, network, payload, next, end){
         params[props[i]] = payload.params[i]
       }
 
-      etherscanXHR(true, proto, network, 'account', 'txlist', params, end)
+      vaporscanXHR(true, proto, network, 'account', 'txlist', params, end)
       return
 
-    case 'eth_call':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_call', payload.params[0], end)
+    case 'vap_call':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_call', payload.params[0], end)
       return
 
-    case 'eth_sendRawTransaction':
-      etherscanXHR(false, proto, network, 'proxy', 'eth_sendRawTransaction', { hex: payload.params[0] }, end)
+    case 'vap_sendRawTransaction':
+      vaporscanXHR(false, proto, network, 'proxy', 'vap_sendRawTransaction', { hex: payload.params[0] }, end)
       return
 
-    case 'eth_getTransactionReceipt':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getTransactionReceipt', { txhash: payload.params[0] }, end)
+    case 'vap_getTransactionReceipt':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getTransactionReceipt', { txhash: payload.params[0] }, end)
       return
 
     // note !! this does not support topic filtering yet, it will return all block logs
-    case 'eth_getLogs':
+    case 'vap_getLogs':
       var payloadObject = payload.params[0],
           txProcessed = 0,
           logs = [];
 
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getBlockByNumber', {
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getBlockByNumber', {
         tag: payloadObject.toBlock,
         boolean: payload.params[1] }, function(err, blockResult) {
           if(err) return end(err);
 
           for(var transaction in blockResult.transactions){
-            etherscanXHR(true, proto, network, 'proxy', 'eth_getTransactionReceipt', { txhash: transaction.hash }, function(err, receiptResult) {
+            vaporscanXHR(true, proto, network, 'proxy', 'vap_getTransactionReceipt', { txhash: transaction.hash }, function(err, receiptResult) {
               if(!err) logs.concat(receiptResult.logs);
               txProcessed += 1;
               if(txProcessed === blockResult.transactions.length) end(null, logs)
@@ -151,22 +151,22 @@ function handlePayload(proto, network, payload, next, end){
         })
       return
 
-    case 'eth_getTransactionCount':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getTransactionCount', {
+    case 'vap_getTransactionCount':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getTransactionCount', {
         address: payload.params[0],
         tag: payload.params[1]
       }, end)
       return
 
-    case 'eth_getCode':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getCode', {
+    case 'vap_getCode':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getCode', {
         address: payload.params[0],
         tag: payload.params[1]
       }, end)
       return
 
-    case 'eth_getStorageAt':
-      etherscanXHR(true, proto, network, 'proxy', 'eth_getStorageAt', {
+    case 'vap_getStorageAt':
+      vaporscanXHR(true, proto, network, 'proxy', 'vap_getStorageAt', {
         address: payload.params[0],
         position: payload.params[1],
         tag: payload.params[2]
@@ -185,8 +185,8 @@ function toQueryString(params) {
   }).join('&')
 }
 
-function etherscanXHR(useGetMethod, proto, network, module, action, params, end) {
-  var uri = proto + '://' + network + '.etherscan.io/api?' + toQueryString({ module: module, action: action }) + '&' + toQueryString(params)
+function vaporscanXHR(useGetMethod, proto, network, module, action, params, end) {
+  var uri = proto + '://' + network + '.vaporscan.io/api?' + toQueryString({ module: module, action: action }) + '&' + toQueryString(params)
 	
   xhr({
     uri: uri,
@@ -197,11 +197,11 @@ function etherscanXHR(useGetMethod, proto, network, module, action, params, end)
     },
     rejectUnauthorized: false,
   }, function(err, res, body) {
-    // console.log('[etherscan] response: ', err)
+    // console.log('[vaporscan] response: ', err)
 
     if (err) return end(err)
 	
-	  /*console.log('[etherscan request]' 
+	  /*console.log('[vaporscan request]' 
 				  + ' method: ' + useGetMethod
 				  + ' proto: ' + proto
 				  + ' network: ' + network
@@ -221,7 +221,7 @@ function etherscanXHR(useGetMethod, proto, network, module, action, params, end)
       return end(err)
     }
 
-    // console.log('[etherscan] response decoded: ', data)
+    // console.log('[vaporscan] response decoded: ', data)
 
     // NOTE: or use id === -1? (id=1 is 'success')
     if ((module === 'proxy') && data.error) {

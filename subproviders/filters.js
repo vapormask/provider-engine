@@ -1,6 +1,6 @@
 const async = require('async')
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const Subprovider = require('./subprovider.js')
 const Stoplight = require('../util/stoplight.js')
 const EventEmitter = require('events').EventEmitter
@@ -8,12 +8,12 @@ const EventEmitter = require('events').EventEmitter
 module.exports = FilterSubprovider
 
 // handles the following RPC methods:
-//   eth_newBlockFilter
-//   eth_newPendingTransactionFilter
-//   eth_newFilter
-//   eth_getFilterChanges
-//   eth_uninstallFilter
-//   eth_getFilterLogs
+//   vap_newBlockFilter
+//   vap_newPendingTransactionFilter
+//   vap_newFilter
+//   vap_getFilterChanges
+//   vap_uninstallFilter
+//   vap_getFilterLogs
 
 inherits(FilterSubprovider, Subprovider)
 
@@ -53,32 +53,32 @@ FilterSubprovider.prototype.handleRequest = function(payload, next, end){
   const self = this
   switch(payload.method){
 
-    case 'eth_newBlockFilter':
+    case 'vap_newBlockFilter':
       self.newBlockFilter(end)
       return
 
-    case 'eth_newPendingTransactionFilter':
+    case 'vap_newPendingTransactionFilter':
       self.newPendingTransactionFilter(end)
       self.checkForPendingBlocks()
       return
 
-    case 'eth_newFilter':
+    case 'vap_newFilter':
       self.newLogFilter(payload.params[0], end)
       return
 
-    case 'eth_getFilterChanges':
+    case 'vap_getFilterChanges':
       self._ready.await(function(){
         self.getFilterChanges(payload.params[0], end)
       })
       return
 
-    case 'eth_getFilterLogs':
+    case 'vap_getFilterLogs':
       self._ready.await(function(){
         self.getFilterLogs(payload.params[0], end)
       })
       return
 
-    case 'eth_uninstallFilter':
+    case 'vap_uninstallFilter':
       self._ready.await(function(){
         self.uninstallFilter(payload.params[0], end)
       })
@@ -180,7 +180,7 @@ FilterSubprovider.prototype.getFilterLogs = function(filterId, cb) {
   if (!filter) return cb(null, [])
   if (filter.type === 'log') {
     self.emitPayload({
-      method: 'eth_getLogs',
+      method: 'vap_getLogs',
       params: [{
         fromBlock: filter.fromBlock,
         toBlock: filter.toBlock,
@@ -228,7 +228,7 @@ FilterSubprovider.prototype.checkForPendingBlocks = function(){
   if (activePendingTxFilters) {
     self.checkForPendingBlocksActive = true
     self.emitPayload({
-      method: 'eth_getBlockByNumber',
+      method: 'vap_getBlockByNumber',
       params: ['pending', true],
     }, function(err, res){
       if (err) {
@@ -263,7 +263,7 @@ FilterSubprovider.prototype._logsForBlock = function(block, cb) {
   const self = this
   var blockNumber = bufferToNumberHex(block.number)
   self.emitPayload({
-    method: 'eth_getLogs',
+    method: 'vap_getLogs',
     params: [{
       fromBlock: blockNumber,
       toBlock: blockNumber,
@@ -489,7 +489,7 @@ function normalizeHex(hexString) {
 }
 
 function intToHex(value) {
-  return ethUtil.intToHex(value)
+  return vapUtil.intToHex(value)
 }
 
 function hexToInt(hexString) {
@@ -505,7 +505,7 @@ function bufferToNumberHex(buffer) {
 }
 
 function stripLeadingZero(hexNum) {
-  let stripped = ethUtil.stripHexPrefix(hexNum)
+  let stripped = vapUtil.stripHexPrefix(hexNum)
   while (stripped[0] === '0') {
     stripped = stripped.substr(1)
   }

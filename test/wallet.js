@@ -1,11 +1,11 @@
 const test = require('tape')
-const Transaction = require('ethereumjs-tx')
-const ethUtil = require('ethereumjs-util')
+const Transaction = require('vaporyjs-tx')
+const vapUtil = require('vaporyjs-util')
 const ProviderEngine = require('../index.js')
 const FixtureProvider = require('../subproviders/fixture.js')
 const NonceTracker = require('../subproviders/nonce-tracker.js')
 const HookedWalletProvider = require('../subproviders/hooked-wallet.js')
-const HookedWalletTxProvider = require('../subproviders/hooked-wallet-ethtx.js')
+const HookedWalletTxProvider = require('../subproviders/hooked-wallet-vaptx.js')
 const TestBlockProvider = require('./util/block.js')
 const createPayload = require('../util/create-payload.js')
 const injectMetrics = require('./util/inject-metrics')
@@ -35,10 +35,10 @@ test('tx sig', function(t){
   var providerB = injectMetrics(new NonceTracker())
   // handle all bottom requests
   var providerC = injectMetrics(new FixtureProvider({
-    eth_gasPrice: '0x1234',
-    eth_getTransactionCount: '0x00',
-    eth_sendRawTransaction: function(payload, next, done){
-      var rawTx = ethUtil.toBuffer(payload.params[0])
+    vap_gasPrice: '0x1234',
+    vap_getTransactionCount: '0x00',
+    vap_sendRawTransaction: function(payload, next, done){
+      var rawTx = vapUtil.toBuffer(payload.params[0])
       var tx = new Transaction(rawTx)
       var hash = '0x'+tx.hash().toString('hex')
       done(null, hash)
@@ -54,7 +54,7 @@ test('tx sig', function(t){
   engine.addProvider(providerD)
 
   var txPayload = {
-    method: 'eth_sendTransaction',
+    method: 'vap_sendTransaction',
     params: [{
       from: addressHex,
       to: addressHex,
@@ -69,22 +69,22 @@ test('tx sig', function(t){
     t.ok(response, 'has response')
 
     // intial tx request
-    t.equal(providerA.getWitnessed('eth_sendTransaction').length, 1, 'providerA did see "signTransaction"')
-    t.equal(providerA.getHandled('eth_sendTransaction').length, 1, 'providerA did handle "signTransaction"')
+    t.equal(providerA.getWitnessed('vap_sendTransaction').length, 1, 'providerA did see "signTransaction"')
+    t.equal(providerA.getHandled('vap_sendTransaction').length, 1, 'providerA did handle "signTransaction"')
 
     // tx nonce
-    t.equal(providerB.getWitnessed('eth_getTransactionCount').length, 1, 'providerB did see "eth_getTransactionCount"')
-    t.equal(providerB.getHandled('eth_getTransactionCount').length, 0, 'providerB did NOT handle "eth_getTransactionCount"')
-    t.equal(providerC.getWitnessed('eth_getTransactionCount').length, 1, 'providerC did see "eth_getTransactionCount"')
-    t.equal(providerC.getHandled('eth_getTransactionCount').length, 1, 'providerC did handle "eth_getTransactionCount"')
+    t.equal(providerB.getWitnessed('vap_getTransactionCount').length, 1, 'providerB did see "vap_getTransactionCount"')
+    t.equal(providerB.getHandled('vap_getTransactionCount').length, 0, 'providerB did NOT handle "vap_getTransactionCount"')
+    t.equal(providerC.getWitnessed('vap_getTransactionCount').length, 1, 'providerC did see "vap_getTransactionCount"')
+    t.equal(providerC.getHandled('vap_getTransactionCount').length, 1, 'providerC did handle "vap_getTransactionCount"')
 
     // gas price
-    t.equal(providerC.getWitnessed('eth_gasPrice').length, 1, 'providerB did see "eth_gasPrice"')
-    t.equal(providerC.getHandled('eth_gasPrice').length, 1, 'providerB did handle "eth_gasPrice"')
+    t.equal(providerC.getWitnessed('vap_gasPrice').length, 1, 'providerB did see "vap_gasPrice"')
+    t.equal(providerC.getHandled('vap_gasPrice').length, 1, 'providerB did handle "vap_gasPrice"')
 
     // send raw tx
-    t.equal(providerC.getWitnessed('eth_sendRawTransaction').length, 1, 'providerC did see "eth_sendRawTransaction"')
-    t.equal(providerC.getHandled('eth_sendRawTransaction').length, 1, 'providerC did handle "eth_sendRawTransaction"')
+    t.equal(providerC.getWitnessed('vap_sendRawTransaction').length, 1, 'providerC did see "vap_sendRawTransaction"')
+    t.equal(providerC.getHandled('vap_sendRawTransaction').length, 1, 'providerC did handle "vap_sendRawTransaction"')
 
     engine.stop()
     t.end()
@@ -109,10 +109,10 @@ test('no such account', function(t){
   var providerB = injectMetrics(new NonceTracker())
   // handle all bottom requests
   var providerC = injectMetrics(new FixtureProvider({
-    eth_gasPrice: '0x1234',
-    eth_getTransactionCount: '0x00',
-    eth_sendRawTransaction: function(payload, next, done){
-      var rawTx = ethUtil.toBuffer(payload.params[0])
+    vap_gasPrice: '0x1234',
+    vap_getTransactionCount: '0x00',
+    vap_sendRawTransaction: function(payload, next, done){
+      var rawTx = vapUtil.toBuffer(payload.params[0])
       var tx = new Transaction(rawTx)
       var hash = '0x'+tx.hash().toString('hex')
       done(null, hash)
@@ -128,7 +128,7 @@ test('no such account', function(t){
   engine.addProvider(providerD)
 
   var txPayload = {
-    method: 'eth_sendTransaction',
+    method: 'vap_sendTransaction',
     params: [{
       from: otherAddressHex,
       to: addressHex,
@@ -175,7 +175,7 @@ test('sign message', function(t){
   engine.addProvider(providerB)
 
   var payload = {
-    method: 'eth_sign',
+    method: 'vap_sign',
     params: [
       addressHex,
       message,
@@ -252,7 +252,7 @@ recoverTest({
 
 signatureTest({
   testLabel: 'sign typed message',
-  method: 'eth_signTypedData',
+  method: 'vap_signTypedData',
   message: [
     {
       type: 'string',
@@ -283,9 +283,9 @@ test('sender validation, with mixed-case', function(t){
   var providerB = injectMetrics(new TestBlockProvider())
   // handle all bottom requests
   var providerC = injectMetrics(new FixtureProvider({
-    eth_gasPrice: '0x1234',
-    eth_estimateGas: '0x1234',
-    eth_getTransactionCount: '0x00',
+    vap_gasPrice: '0x1234',
+    vap_estimateGas: '0x1234',
+    vap_getTransactionCount: '0x00',
   }))
 
   var engine = new ProviderEngine()
@@ -295,7 +295,7 @@ test('sender validation, with mixed-case', function(t){
 
   engine.start()
   engine.sendAsync({
-    method: 'eth_sendTransaction',
+    method: 'vap_sendTransaction',
     params: [{
       from: senderAddress.toLowerCase(),
     }]

@@ -1,12 +1,12 @@
 const inherits = require('util').inherits
 const extend = require('xtend')
-const ethUtil = require('ethereumjs-util')
+const vapUtil = require('vaporyjs-util')
 const FixtureProvider = require('../../subproviders/fixture.js')
 
 module.exports = TestBlockProvider
 
 //
-// handles only `eth_getBlockByNumber` requests
+// handles only `vap_getBlockByNumber` requests
 // returns a dummy block
 //
 
@@ -17,13 +17,13 @@ function TestBlockProvider(methods){
   self._pendingTxs = []
   self.nextBlock()
   FixtureProvider.call(self, {
-    eth_getBlockByNumber: function(payload, next, end){
+    vap_getBlockByNumber: function(payload, next, end){
       const blockRef = payload.params[0]
       const result = self.getBlockByRef(blockRef)
       // return result asynchronously
       setTimeout(() => end(null, result))
     },
-    eth_getLogs: function(payload, next, end){
+    vap_getLogs: function(payload, next, end){
       const transactions = self._currentBlock.transactions
       // return result asynchronously
       setTimeout(() => end(null, transactions))
@@ -88,7 +88,7 @@ function createBlock(blockParams, prevBlock, txs) {
   blockParams = blockParams || {}
   txs = txs || []
   var defaultNumber = prevBlock ? incrementHex(prevBlock.number) : '0x1'
-  var defaultGasLimit = ethUtil.intToHex(4712388)
+  var defaultGasLimit = vapUtil.intToHex(4712388)
   return extend({
     // defaults
     number:            defaultNumber,
@@ -114,17 +114,17 @@ function createBlock(blockParams, prevBlock, txs) {
 }
 
 function incrementHex(hexString){
-  return stripLeadingZeroes(ethUtil.intToHex(Number(hexString)+1))
+  return stripLeadingZeroes(vapUtil.intToHex(Number(hexString)+1))
 }
 
 function randomHash(){
-  return ethUtil.intToHex(Math.floor(Math.random()*Number.MAX_SAFE_INTEGER))
+  return vapUtil.intToHex(Math.floor(Math.random()*Number.MAX_SAFE_INTEGER))
 }
 
 function stripLeadingZeroes (hexString) {
-  let strippedHex = ethUtil.stripHexPrefix(hexString)
+  let strippedHex = vapUtil.stripHexPrefix(hexString)
   while (strippedHex[0] === '0') {
     strippedHex = strippedHex.substr(1)
   }
-  return ethUtil.addHexPrefix(strippedHex)
+  return vapUtil.addHexPrefix(strippedHex)
 }

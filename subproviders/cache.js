@@ -1,6 +1,6 @@
 const inherits = require('util').inherits
-const ethUtil = require('ethereumjs-util')
-const BN = ethUtil.BN
+const vapUtil = require('vaporyjs-util')
+const BN = vapUtil.BN
 const clone = require('clone')
 const cacheUtils = require('../util/rpc-cache-utils.js')
 const Stoplight = require('../util/stoplight.js')
@@ -17,8 +17,8 @@ function BlockCacheProvider(opts) {
   self._ready = new Stoplight()
   self.strategies = {
     perma: new ConditionalPermaCacheStrategy({
-      eth_getTransactionByHash: containsBlockhash,
-      eth_getTransactionReceipt: containsBlockhash,
+      vap_getTransactionByHash: containsBlockhash,
+      vap_getTransactionReceipt: containsBlockhash,
     }),
     block: new BlockCacheStrategy(self),
     fork: new BlockCacheStrategy(self),
@@ -56,7 +56,7 @@ BlockCacheProvider.prototype.handleRequest = function(payload, next, end){
   }
 
   // Ignore block polling requests.
-  if (payload.method === 'eth_getBlockByNumber' && payload.params[0] === 'latest') {
+  if (payload.method === 'vap_getBlockByNumber' && payload.params[0] === 'latest') {
     // console.log('CACHE SKIP - Ignore block polling requests.')
     return next()
   }
@@ -91,7 +91,7 @@ BlockCacheProvider.prototype._handleRequest = function(payload, next, end){
   if (blockTag === 'earliest') {
     requestedBlockNumber = '0x00'
   } else if (blockTag === 'latest') {
-    requestedBlockNumber = ethUtil.bufferToHex(self.currentBlock.number)
+    requestedBlockNumber = vapUtil.bufferToHex(self.currentBlock.number)
   } else {
     // We have a hex number
     requestedBlockNumber = blockTag
@@ -250,7 +250,7 @@ BlockCacheStrategy.prototype.canCache = function(payload) {
 // naively removes older block caches
 BlockCacheStrategy.prototype.cacheRollOff = function(previousBlock){
   const self = this
-  var previousHex = ethUtil.bufferToHex(previousBlock.number)
+  var previousHex = vapUtil.bufferToHex(previousBlock.number)
   delete self.cache[previousHex]
 }
 
@@ -264,7 +264,7 @@ function compareHex(hexA, hexB){
 }
 
 function hexToBN(hex){
-  return new BN(ethUtil.toBuffer(hex))
+  return new BN(vapUtil.toBuffer(hex))
 }
 
 function containsBlockhash(result) {

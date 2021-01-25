@@ -6,7 +6,7 @@ const createPayload = require('../util/create-payload.js')
 const injectMetrics = require('./util/inject-metrics')
 
 subscriptionTest('basic block subscription', {
-    method: 'eth_subscribe',
+    method: 'vap_subscribe',
     params: ['newHeads']
   },
   function afterInstall(t, testMeta, response, cb){
@@ -21,7 +21,7 @@ subscriptionTest('basic block subscription', {
 )
 
 subscriptionTest('log subscription - basic', {
-    method: 'eth_subscribe',
+    method: 'vap_subscribe',
     params: ['logs', {
       topics: ['0x00000000000000000000000000000000000000000000000000deadbeefcafe01']
     }],
@@ -43,7 +43,7 @@ subscriptionTest('log subscription - basic', {
 )
 
 subscriptionTest('log subscription - and logic', {
-    method: 'eth_subscribe',
+    method: 'vap_subscribe',
     params: ['logs', {
       topics: [
       '0x00000000000000000000000000000000000000000000000000deadbeefcafe01',
@@ -74,7 +74,7 @@ subscriptionTest('log subscription - and logic', {
 )
 
 subscriptionTest('log subscription - or logic', {
-    method: 'eth_subscribe',
+    method: 'vap_subscribe',
     params: ['logs', {
       topics: [
         [
@@ -111,7 +111,7 @@ subscriptionTest('log subscription - or logic', {
 )
 
 subscriptionTest('log subscription - wildcard logic', {
-    method: 'eth_subscribe',
+    method: 'vap_subscribe',
     params: ['logs', {
       topics: [
         null,
@@ -227,7 +227,7 @@ function subscriptionTest(label, subscriptionPayload, afterInstall, subscription
     }
 
     function end() {
-      engine.sendAsync(createPayload({ method: 'eth_unsubscribe', params: [testMeta.subscriptionId] }), function (err, response) {
+      engine.sendAsync(createPayload({ method: 'vap_unsubscribe', params: [testMeta.subscriptionId] }), function (err, response) {
         testMeta.engine.stop()
         t.ifError(err, 'did not error')
         t.end()

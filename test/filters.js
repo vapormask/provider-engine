@@ -6,7 +6,7 @@ const createPayload = require('../util/create-payload.js')
 const injectMetrics = require('./util/inject-metrics')
 
 
-filterTest('basic block filter', { method: 'eth_newBlockFilter' },
+filterTest('basic block filter', { method: 'vap_newBlockFilter' },
   function afterInstall(t, testMeta, response, cb){
     var block = testMeta.block = testMeta.blockProvider.nextBlock()
     cb()
@@ -26,7 +26,7 @@ filterTest('basic block filter', { method: 'eth_newBlockFilter' },
 )
 
 filterTest('log filter - basic', {
-    method: 'eth_newFilter',
+    method: 'vap_newFilter',
     params: [{
       topics: ['0x00000000000000000000000000000000000000000000000000deadbeefcafe01']
     }],
@@ -56,7 +56,7 @@ filterTest('log filter - basic', {
 )
 
 filterTest('log filter - and logic', {
-    method: 'eth_newFilter',
+    method: 'vap_newFilter',
     params: [{
       topics: [
       '0x00000000000000000000000000000000000000000000000000deadbeefcafe01',
@@ -95,7 +95,7 @@ filterTest('log filter - and logic', {
 )
 
 filterTest('log filter - or logic', {
-    method: 'eth_newFilter',
+    method: 'vap_newFilter',
     params: [{
       topics: [
         [
@@ -141,7 +141,7 @@ filterTest('log filter - or logic', {
 )
 
 filterTest('log filter - wildcard logic', {
-    method: 'eth_newFilter',
+    method: 'vap_newFilter',
     params: [{
       topics: [
         null,
@@ -239,23 +239,23 @@ function filterTest(label, filterPayload, afterInstall, filterChangesOne, filter
     function continueTest(filterId){
       var filterId = testMeta.filterId
       // after filter check one
-      engine.sendAsync(createPayload({ method: 'eth_getFilterChanges', params: [filterId] }), function(err, response){
+      engine.sendAsync(createPayload({ method: 'vap_getFilterChanges', params: [filterId] }), function(err, response){
         t.ifError(err, 'did not error')
         t.ok(response, 'has response')
 
-        t.equal(filterProvider.getWitnessed('eth_getFilterChanges').length, 1, 'filterProvider did see "eth_getFilterChanges"')
-        t.equal(filterProvider.getHandled('eth_getFilterChanges').length, 1, 'filterProvider did handle "eth_getFilterChanges"')
+        t.equal(filterProvider.getWitnessed('vap_getFilterChanges').length, 1, 'filterProvider did see "vap_getFilterChanges"')
+        t.equal(filterProvider.getHandled('vap_getFilterChanges').length, 1, 'filterProvider did handle "vap_getFilterChanges"')
 
         filterChangesOne(t, testMeta, response, function(err){
           t.ifError(err, 'did not error')
 
           // after filter check two
-          engine.sendAsync(createPayload({ method: 'eth_getFilterChanges', params: [filterId] }), function(err, response){
+          engine.sendAsync(createPayload({ method: 'vap_getFilterChanges', params: [filterId] }), function(err, response){
             t.ifError(err, 'did not error')
             t.ok(response, 'has response')
 
-            t.equal(filterProvider.getWitnessed('eth_getFilterChanges').length, 2, 'filterProvider did see "eth_getFilterChanges"')
-            t.equal(filterProvider.getHandled('eth_getFilterChanges').length, 2, 'filterProvider did handle "eth_getFilterChanges"')
+            t.equal(filterProvider.getWitnessed('vap_getFilterChanges').length, 2, 'filterProvider did see "vap_getFilterChanges"')
+            t.equal(filterProvider.getHandled('vap_getFilterChanges').length, 2, 'filterProvider did handle "vap_getFilterChanges"')
 
             filterChangesTwo(t, testMeta, response, function(err){
               t.ifError(err, 'did not error')
