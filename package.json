@@ -1,5 +1,6 @@
 {
-  "name": "web3-provider-engine",
+  "name": "@vapormask/web3-provider-engine",
+  "namespace": "vapormask",
   "version": "13.8.0",
   "description": "Web3 ProviderEngine is a tool for composing your own web3 providers",
   "repository": "https://github.com/vapormask/provider-engine",
