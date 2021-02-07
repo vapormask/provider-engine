@@ -1,7 +1,7 @@
 {
   "name": "@vapormask/web3-provider-engine",
   "namespace": "vapormask",
-  "version": "8.1.1",
+  "version": "8.1.1-a",
   "description": "Web3 ProviderEngine is a tool for composing your own web3 providers.",
   "repository": "https://github.com/VaporMask/provider-engine",
   "main": "index.js",
@@ -25,9 +25,9 @@
     "isomorphic-fetch": "^2.2.0",
     "request": "^2.67.0",
     "semaphore": "^1.0.3",
-    "solc": "^0.4.2",
+    "@vapory/solc": "0.4.19-a",
     "tape": "^4.4.0",
-    "@vapory/web3": "0.20.4",
+    "@vapory/web3": "0.20.4-b",
     "xhr": "^2.2.0",
     "xtend": "^4.0.1"
   },

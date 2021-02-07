@@ -6,7 +6,7 @@ const SolcProvider = require('../subproviders/solc.js')
 const TestBlockProvider = require('./util/block.js')
 const createPayload = require('../util/create-payload.js')
 const injectMetrics = require('./util/inject-metrics')
-const solc = require('solc')
+const solc = require('@vapory/solc')
 
 test('solc test', function(t){
   t.plan(10)

@@ -1,5 +1,5 @@
 const inherits = require('util').inherits
-const solc = require('solc')
+const solc = require('@vapory/solc')
 const Subprovider = require('./subprovider.js')
 
 module.exports = SolcSubprovider
